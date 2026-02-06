@@ -23,3 +23,8 @@ go.work.sum
 
 # env file
 .env
+
+.specstory
+.DS_Store
+.cursor
+.cursorindexingignore

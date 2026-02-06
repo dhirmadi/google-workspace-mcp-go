@@ -1,0 +1,10 @@
+.git
+.gitignore
+.cursor
+.specstory
+.DS_Store
+.env
+docs/
+*.md
+*.test
+*.out
