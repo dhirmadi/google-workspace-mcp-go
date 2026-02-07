@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"google.golang.org/api/googleapi"
 )
@@ -26,9 +27,22 @@ func HandleGoogleAPIError(err error) error {
 				"authentication expired for this user — call start_google_auth tool to re-authenticate, " +
 					"or verify the OAuth configuration is correct")
 		case 403:
+			msg := googleErr.Message
+			lower := strings.ToLower(msg)
+
+			// Detect Google Workspace admin policy restrictions on sharing
+			if strings.Contains(lower, "sharing outside") ||
+				strings.Contains(lower, "not allowed to share") ||
+				(strings.Contains(lower, "insufficient permissions") && strings.Contains(lower, "parent")) {
+				return fmt.Errorf(
+					"permission denied — this may be restricted by your organization's Google Workspace policy "+
+						"(e.g., sharing outside the domain is disabled, or you lack write access to the target folder). "+
+						"Detail: %s", msg)
+			}
+
 			return fmt.Errorf(
 				"permission denied — the required OAuth scope may not be granted. "+
-					"Suggest the user re-authenticate with broader scopes. Detail: %s", googleErr.Message)
+					"Suggest the user re-authenticate with broader scopes. Detail: %s", msg)
 		case 404:
 			return fmt.Errorf(
 				"resource not found — verify the ID is correct and the user has access to it")

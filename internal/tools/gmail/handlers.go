@@ -136,6 +136,14 @@ func createGetMessageContentHandler(factory *services.Factory) mcp.ToolHandlerFo
 		if detail.MessageID != "" {
 			rb.KeyValue("Message-ID Header", detail.MessageID)
 		}
+		if len(detail.Attachments) > 0 {
+			rb.Blank()
+			rb.Section("Attachments")
+			for _, a := range detail.Attachments {
+				rb.Item("%s (%s, %d bytes)", a.Filename, a.MimeType, a.Size)
+				rb.Line("    Attachment ID: %s", a.AttachmentID)
+			}
+		}
 		rb.Blank()
 		rb.Section("Body")
 		rb.Raw(detail.Body)
@@ -211,6 +219,12 @@ func createBatchGetMessagesHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.KeyValue("From", m.From)
 			rb.KeyValue("Date", m.Date)
 			rb.KeyValue("ID", m.ID)
+			if len(m.Attachments) > 0 {
+				rb.KeyValue("Attachments", len(m.Attachments))
+				for _, a := range m.Attachments {
+					rb.Line("    • %s (%s, %d bytes) — ID: %s", a.Filename, a.MimeType, a.Size, a.AttachmentID)
+				}
+			}
 			rb.Blank()
 			rb.Raw(m.Body)
 			rb.Blank()
