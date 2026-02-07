@@ -144,6 +144,145 @@ func TestBuildRawMessage(t *testing.T) {
 	}
 }
 
+func TestExtractAttachments(t *testing.T) {
+	msg := &gmail.MessagePart{
+		MimeType: "multipart/mixed",
+		Parts: []*gmail.MessagePart{
+			{
+				MimeType: "text/plain",
+				Body:     &gmail.MessagePartBody{Data: base64.URLEncoding.EncodeToString([]byte("Hello"))},
+			},
+			{
+				MimeType: "application/pdf",
+				Filename: "report.pdf",
+				Body: &gmail.MessagePartBody{
+					AttachmentId: "att-123",
+					Size:         1024,
+				},
+			},
+			{
+				MimeType: "image/png",
+				Filename: "screenshot.png",
+				Body: &gmail.MessagePartBody{
+					AttachmentId: "att-456",
+					Size:         2048,
+				},
+			},
+		},
+	}
+
+	attachments := extractAttachments(msg)
+	if len(attachments) != 2 {
+		t.Fatalf("expected 2 attachments, got %d", len(attachments))
+	}
+
+	if attachments[0].Filename != "report.pdf" {
+		t.Errorf("attachment[0].Filename = %q, want %q", attachments[0].Filename, "report.pdf")
+	}
+	if attachments[0].AttachmentID != "att-123" {
+		t.Errorf("attachment[0].AttachmentID = %q, want %q", attachments[0].AttachmentID, "att-123")
+	}
+	if attachments[0].MimeType != "application/pdf" {
+		t.Errorf("attachment[0].MimeType = %q, want %q", attachments[0].MimeType, "application/pdf")
+	}
+	if attachments[0].Size != 1024 {
+		t.Errorf("attachment[0].Size = %d, want %d", attachments[0].Size, 1024)
+	}
+
+	if attachments[1].Filename != "screenshot.png" {
+		t.Errorf("attachment[1].Filename = %q, want %q", attachments[1].Filename, "screenshot.png")
+	}
+	if attachments[1].AttachmentID != "att-456" {
+		t.Errorf("attachment[1].AttachmentID = %q, want %q", attachments[1].AttachmentID, "att-456")
+	}
+}
+
+func TestExtractAttachmentsNested(t *testing.T) {
+	msg := &gmail.MessagePart{
+		MimeType: "multipart/mixed",
+		Parts: []*gmail.MessagePart{
+			{
+				MimeType: "multipart/alternative",
+				Parts: []*gmail.MessagePart{
+					{
+						MimeType: "text/plain",
+						Body:     &gmail.MessagePartBody{Data: base64.URLEncoding.EncodeToString([]byte("Body"))},
+					},
+				},
+			},
+			{
+				MimeType: "application/zip",
+				Filename: "archive.zip",
+				Body: &gmail.MessagePartBody{
+					AttachmentId: "att-nested",
+					Size:         4096,
+				},
+			},
+		},
+	}
+
+	attachments := extractAttachments(msg)
+	if len(attachments) != 1 {
+		t.Fatalf("expected 1 attachment, got %d", len(attachments))
+	}
+	if attachments[0].Filename != "archive.zip" {
+		t.Errorf("Filename = %q, want %q", attachments[0].Filename, "archive.zip")
+	}
+}
+
+func TestExtractAttachmentsNone(t *testing.T) {
+	msg := &gmail.MessagePart{
+		MimeType: "text/plain",
+		Body:     &gmail.MessagePartBody{Data: base64.URLEncoding.EncodeToString([]byte("No attachments"))},
+	}
+
+	attachments := extractAttachments(msg)
+	if len(attachments) != 0 {
+		t.Errorf("expected 0 attachments, got %d", len(attachments))
+	}
+}
+
+func TestMessageToDetailWithAttachments(t *testing.T) {
+	msg := &gmail.Message{
+		Id:       "msg-with-att",
+		ThreadId: "thread-att",
+		LabelIds: []string{"INBOX"},
+		Payload: &gmail.MessagePart{
+			MimeType: "multipart/mixed",
+			Headers: []*gmail.MessagePartHeader{
+				{Name: "Subject", Value: "File attached"},
+				{Name: "From", Value: "sender@example.com"},
+				{Name: "To", Value: "recipient@example.com"},
+			},
+			Parts: []*gmail.MessagePart{
+				{
+					MimeType: "text/plain",
+					Body:     &gmail.MessagePartBody{Data: base64.URLEncoding.EncodeToString([]byte("See attached"))},
+				},
+				{
+					MimeType: "application/pdf",
+					Filename: "doc.pdf",
+					Body: &gmail.MessagePartBody{
+						AttachmentId: "att-doc",
+						Size:         512,
+					},
+				},
+			},
+		},
+	}
+
+	detail := messageToDetail(msg)
+	if len(detail.Attachments) != 1 {
+		t.Fatalf("expected 1 attachment, got %d", len(detail.Attachments))
+	}
+	if detail.Attachments[0].Filename != "doc.pdf" {
+		t.Errorf("Filename = %q, want %q", detail.Attachments[0].Filename, "doc.pdf")
+	}
+	if detail.Body != "See attached" {
+		t.Errorf("Body = %q, want %q", detail.Body, "See attached")
+	}
+}
+
 func TestBuildRawMessageMinimal(t *testing.T) {
 	raw := buildRawMessage("bob@example.com", "Hi", "Body", "", "", "", "", "")
 	decoded, err := base64.URLEncoding.DecodeString(raw)

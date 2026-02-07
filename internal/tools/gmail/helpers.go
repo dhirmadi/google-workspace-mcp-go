@@ -22,18 +22,27 @@ type MessageSummary struct {
 	LabelIDs []string `json:"label_ids,omitempty"`
 }
 
+// AttachmentInfo describes a single attachment on a Gmail message.
+type AttachmentInfo struct {
+	AttachmentID string `json:"attachment_id"`
+	Filename     string `json:"filename"`
+	MimeType     string `json:"mime_type"`
+	Size         int64  `json:"size"`
+}
+
 // MessageDetail is the full content of a Gmail message.
 type MessageDetail struct {
-	ID        string   `json:"id"`
-	ThreadID  string   `json:"thread_id"`
-	Subject   string   `json:"subject"`
-	From      string   `json:"from"`
-	To        string   `json:"to"`
-	CC        string   `json:"cc,omitempty"`
-	Date      string   `json:"date"`
-	MessageID string   `json:"message_id,omitempty"`
-	Body      string   `json:"body"`
-	LabelIDs  []string `json:"label_ids,omitempty"`
+	ID          string           `json:"id"`
+	ThreadID    string           `json:"thread_id"`
+	Subject     string           `json:"subject"`
+	From        string           `json:"from"`
+	To          string           `json:"to"`
+	CC          string           `json:"cc,omitempty"`
+	Date        string           `json:"date"`
+	MessageID   string           `json:"message_id,omitempty"`
+	Body        string           `json:"body"`
+	LabelIDs    []string         `json:"label_ids,omitempty"`
+	Attachments []AttachmentInfo `json:"attachments,omitempty"`
 }
 
 // extractHeader returns the value of a named header from a Gmail message.
@@ -102,19 +111,45 @@ func messageToSummary(msg *gmail.Message) MessageSummary {
 	}
 }
 
+// extractAttachments recursively walks message parts and collects attachment metadata.
+func extractAttachments(part *gmail.MessagePart) []AttachmentInfo {
+	var attachments []AttachmentInfo
+
+	if part.Filename != "" && part.Body != nil && part.Body.AttachmentId != "" {
+		attachments = append(attachments, AttachmentInfo{
+			AttachmentID: part.Body.AttachmentId,
+			Filename:     part.Filename,
+			MimeType:     part.MimeType,
+			Size:         part.Body.Size,
+		})
+	}
+
+	for _, child := range part.Parts {
+		attachments = append(attachments, extractAttachments(child)...)
+	}
+
+	return attachments
+}
+
 // messageToDetail converts a Gmail message to full detail including body.
 func messageToDetail(msg *gmail.Message) MessageDetail {
+	var attachments []AttachmentInfo
+	if msg.Payload != nil {
+		attachments = extractAttachments(msg.Payload)
+	}
+
 	return MessageDetail{
-		ID:        msg.Id,
-		ThreadID:  msg.ThreadId,
-		Subject:   extractHeader(msg, "Subject"),
-		From:      extractHeader(msg, "From"),
-		To:        extractHeader(msg, "To"),
-		CC:        extractHeader(msg, "Cc"),
-		Date:      extractHeader(msg, "Date"),
-		MessageID: extractHeader(msg, "Message-ID"),
-		Body:      extractBody(msg),
-		LabelIDs:  msg.LabelIds,
+		ID:          msg.Id,
+		ThreadID:    msg.ThreadId,
+		Subject:     extractHeader(msg, "Subject"),
+		From:        extractHeader(msg, "From"),
+		To:          extractHeader(msg, "To"),
+		CC:          extractHeader(msg, "Cc"),
+		Date:        extractHeader(msg, "Date"),
+		MessageID:   extractHeader(msg, "Message-ID"),
+		Body:        extractBody(msg),
+		LabelIDs:    msg.LabelIds,
+		Attachments: attachments,
 	}
 }
 
