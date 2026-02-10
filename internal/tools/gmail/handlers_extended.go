@@ -96,6 +96,14 @@ func createGetThreadHandler(factory *services.Factory) mcp.ToolHandlerFor[GetThr
 			rb.KeyValue("Date", detail.Date)
 			rb.Blank()
 			rb.Raw(detail.Body)
+			if len(detail.Attachments) > 0 {
+				rb.Blank()
+				rb.Section("Attachments (%d)", len(detail.Attachments))
+				for _, a := range detail.Attachments {
+					rb.Item("%s (%s, %s)", a.Filename, a.MimeType, formatAttachmentSize(a.Size))
+					rb.Line("    Attachment ID: %s", a.AttachmentID)
+				}
+			}
 			rb.Blank()
 		}
 
