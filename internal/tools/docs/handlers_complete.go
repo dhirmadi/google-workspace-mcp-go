@@ -392,13 +392,13 @@ type DebugTableStructureInput struct {
 }
 
 type DebugTableOutput struct {
-	DocumentID string         `json:"document_id"`
-	TableIndex int            `json:"table_index"`
-	Rows       int            `json:"rows"`
-	Columns    int            `json:"columns"`
-	StartIndex int64          `json:"start_index"`
-	EndIndex   int64          `json:"end_index"`
-	Cells      [][]CellDebug  `json:"cells"`
+	DocumentID string        `json:"document_id"`
+	TableIndex int           `json:"table_index"`
+	Rows       int           `json:"rows"`
+	Columns    int           `json:"columns"`
+	StartIndex int64         `json:"start_index"`
+	EndIndex   int64         `json:"end_index"`
+	Cells      [][]CellDebug `json:"cells"`
 }
 
 type CellDebug struct {

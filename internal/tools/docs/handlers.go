@@ -316,9 +316,9 @@ func createSearchDocsHandler(factory *services.Factory) mcp.ToolHandlerFor[Searc
 // --- find_and_replace_doc (extended) ---
 
 type FindAndReplaceDocInput struct {
-	UserEmail  string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	DocumentID string `json:"document_id" jsonschema:"required" jsonschema_description:"The document ID"`
-	FindText   string `json:"find_text" jsonschema:"required" jsonschema_description:"Text to find"`
+	UserEmail   string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	DocumentID  string `json:"document_id" jsonschema:"required" jsonschema_description:"The document ID"`
+	FindText    string `json:"find_text" jsonschema:"required" jsonschema_description:"Text to find"`
 	ReplaceText string `json:"replace_text" jsonschema:"required" jsonschema_description:"Text to replace with"`
 	MatchCase   bool   `json:"match_case,omitempty" jsonschema_description:"Case-sensitive matching (default false)"`
 }
@@ -436,9 +436,9 @@ type InsertDocElementsInput struct {
 
 // DocElement represents a document element to insert.
 type DocElement struct {
-	Type    string `json:"type" jsonschema:"required" jsonschema_description:"Element type: paragraph or list_item,enum=paragraph,enum=list_item"`
-	Text    string `json:"text" jsonschema:"required" jsonschema_description:"Text content"`
-	Index   int64  `json:"index" jsonschema:"required" jsonschema_description:"Insertion index (1-based)"`
+	Type  string `json:"type" jsonschema:"required" jsonschema_description:"Element type: paragraph or list_item,enum=paragraph,enum=list_item"`
+	Text  string `json:"text" jsonschema:"required" jsonschema_description:"Text content"`
+	Index int64  `json:"index" jsonschema:"required" jsonschema_description:"Insertion index (1-based)"`
 }
 
 func createInsertDocElementsHandler(factory *services.Factory) mcp.ToolHandlerFor[InsertDocElementsInput, any] {
@@ -487,12 +487,12 @@ func createInsertDocElementsHandler(factory *services.Factory) mcp.ToolHandlerFo
 // --- update_paragraph_style (extended) ---
 
 type UpdateParagraphStyleInput struct {
-	UserEmail   string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	DocumentID  string `json:"document_id" jsonschema:"required" jsonschema_description:"The document ID"`
-	StartIndex  int64  `json:"start_index" jsonschema:"required" jsonschema_description:"Start of the range to style"`
-	EndIndex    int64  `json:"end_index" jsonschema:"required" jsonschema_description:"End of the range to style"`
-	NamedStyle  string `json:"named_style,omitempty" jsonschema_description:"Named style type: NORMAL_TEXT HEADING_1 HEADING_2 HEADING_3 HEADING_4 HEADING_5 HEADING_6 TITLE SUBTITLE"`
-	Alignment   string `json:"alignment,omitempty" jsonschema_description:"Paragraph alignment: START CENTER END JUSTIFIED"`
+	UserEmail   string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	DocumentID  string   `json:"document_id" jsonschema:"required" jsonschema_description:"The document ID"`
+	StartIndex  int64    `json:"start_index" jsonschema:"required" jsonschema_description:"Start of the range to style"`
+	EndIndex    int64    `json:"end_index" jsonschema:"required" jsonschema_description:"End of the range to style"`
+	NamedStyle  string   `json:"named_style,omitempty" jsonschema_description:"Named style type: NORMAL_TEXT HEADING_1 HEADING_2 HEADING_3 HEADING_4 HEADING_5 HEADING_6 TITLE SUBTITLE"`
+	Alignment   string   `json:"alignment,omitempty" jsonschema_description:"Paragraph alignment: START CENTER END JUSTIFIED"`
 	SpaceAbove  *float64 `json:"space_above,omitempty" jsonschema_description:"Space above paragraph in points"`
 	SpaceBelow  *float64 `json:"space_below,omitempty" jsonschema_description:"Space below paragraph in points"`
 	IndentStart *float64 `json:"indent_start,omitempty" jsonschema_description:"Left indent in points"`
@@ -562,4 +562,3 @@ func createUpdateParagraphStyleHandler(factory *services.Factory) mcp.ToolHandle
 		}, nil, nil
 	}
 }
-

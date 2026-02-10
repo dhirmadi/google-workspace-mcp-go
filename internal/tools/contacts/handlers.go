@@ -398,4 +398,3 @@ func createGetContactGroupHandler(factory *services.Factory) mcp.ToolHandlerFor[
 		}, GetContactGroupOutput{Group: gs}, nil
 	}
 }
-

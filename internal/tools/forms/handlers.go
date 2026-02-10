@@ -146,11 +146,11 @@ type ListFormResponsesOutput struct {
 }
 
 type FormResponseSummary struct {
-	ResponseID     string            `json:"response_id"`
-	CreateTime     string            `json:"create_time"`
-	LastSubmitTime string            `json:"last_submit_time"`
-	RespondentEmail string           `json:"respondent_email,omitempty"`
-	Answers        map[string]string `json:"answers"`
+	ResponseID      string            `json:"response_id"`
+	CreateTime      string            `json:"create_time"`
+	LastSubmitTime  string            `json:"last_submit_time"`
+	RespondentEmail string            `json:"respondent_email,omitempty"`
+	Answers         map[string]string `json:"answers"`
 }
 
 func createListFormResponsesHandler(factory *services.Factory) mcp.ToolHandlerFor[ListFormResponsesInput, ListFormResponsesOutput] {

@@ -333,4 +333,3 @@ func createDeleteTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[Delet
 		}, nil, nil
 	}
 }
-

@@ -105,7 +105,7 @@ func createBatchUpdateContactsHandler(factory *services.Factory) mcp.ToolHandler
 		}
 
 		batchReq := &people.BatchUpdateContactsRequest{
-			Contacts: make(map[string]people.Person),
+			Contacts:   make(map[string]people.Person),
 			UpdateMask: "names,emailAddresses,phoneNumbers,organizations",
 		}
 		for rn, u := range updates {
@@ -238,9 +238,9 @@ func createUpdateContactGroupHandler(factory *services.Factory) mcp.ToolHandlerF
 // --- delete_contact_group (complete) ---
 
 type DeleteContactGroupInput struct {
-	UserEmail    string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	ResourceName string `json:"resource_name" jsonschema:"required" jsonschema_description:"Resource name of the contact group to delete"`
-	DeleteContacts bool `json:"delete_contacts,omitempty" jsonschema_description:"Also delete contacts in this group (default false)"`
+	UserEmail      string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	ResourceName   string `json:"resource_name" jsonschema:"required" jsonschema_description:"Resource name of the contact group to delete"`
+	DeleteContacts bool   `json:"delete_contacts,omitempty" jsonschema_description:"Also delete contacts in this group (default false)"`
 }
 
 func createDeleteContactGroupHandler(factory *services.Factory) mcp.ToolHandlerFor[DeleteContactGroupInput, any] {

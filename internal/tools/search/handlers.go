@@ -148,8 +148,8 @@ type GetSearchEngineInfoInput struct {
 }
 
 type SearchEngineInfoOutput struct {
-	CSEID       string `json:"cse_id"`
-	Title       string `json:"title,omitempty"`
+	CSEID        string `json:"cse_id"`
+	Title        string `json:"title,omitempty"`
 	TotalResults string `json:"total_results,omitempty"`
 }
 

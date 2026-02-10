@@ -136,10 +136,10 @@ func createCopyFileHandler(factory *services.Factory) mcp.ToolHandlerFor[CopyFil
 // --- update_drive_file (extended) ---
 
 type UpdateFileInput struct {
-	UserEmail string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	FileID    string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to update"`
-	Name      string `json:"name,omitempty" jsonschema_description:"New file name"`
-	Content   string `json:"content,omitempty" jsonschema_description:"New text content (replaces file content)"`
+	UserEmail    string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	FileID       string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to update"`
+	Name         string `json:"name,omitempty" jsonschema_description:"New file name"`
+	Content      string `json:"content,omitempty" jsonschema_description:"New text content (replaces file content)"`
 	MoveToFolder string `json:"move_to_folder,omitempty" jsonschema_description:"Folder ID to move file to"`
 }
 
@@ -266,8 +266,8 @@ func createRemovePermissionHandler(factory *services.Factory) mcp.ToolHandlerFor
 // --- transfer_drive_ownership (extended) ---
 
 type TransferOwnershipInput struct {
-	UserEmail    string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	FileID       string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to transfer"`
+	UserEmail     string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	FileID        string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to transfer"`
 	NewOwnerEmail string `json:"new_owner_email" jsonschema:"required" jsonschema_description:"Email of the new owner"`
 }
 
@@ -303,11 +303,11 @@ func createTransferOwnershipHandler(factory *services.Factory) mcp.ToolHandlerFo
 // --- batch_share_drive_file (extended) ---
 
 type BatchShareInput struct {
-	UserEmail  string      `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	FileIDs    []string    `json:"file_ids" jsonschema:"required" jsonschema_description:"File IDs to share"`
-	ShareWith  string      `json:"share_with" jsonschema:"required" jsonschema_description:"Email address to share with"`
-	Role       string      `json:"role,omitempty" jsonschema_description:"Permission role: reader/writer/commenter (default reader)"`
-	SendNotification bool `json:"send_notification,omitempty" jsonschema_description:"Send notification email (default true)"`
+	UserEmail        string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	FileIDs          []string `json:"file_ids" jsonschema:"required" jsonschema_description:"File IDs to share"`
+	ShareWith        string   `json:"share_with" jsonschema:"required" jsonschema_description:"Email address to share with"`
+	Role             string   `json:"role,omitempty" jsonschema_description:"Permission role: reader/writer/commenter (default reader)"`
+	SendNotification bool     `json:"send_notification,omitempty" jsonschema_description:"Send notification email (default true)"`
 }
 
 func createBatchShareHandler(factory *services.Factory) mcp.ToolHandlerFor[BatchShareInput, any] {
