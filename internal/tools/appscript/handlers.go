@@ -821,8 +821,8 @@ type GetScriptMetricsInput struct {
 }
 
 type GetScriptMetricsOutput struct {
-	ScriptID    string           `json:"script_id"`
-	MetricSets  []MetricSetEntry `json:"metric_sets"`
+	ScriptID   string           `json:"script_id"`
+	MetricSets []MetricSetEntry `json:"metric_sets"`
 }
 
 type MetricSetEntry struct {

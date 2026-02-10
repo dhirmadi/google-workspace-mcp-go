@@ -13,7 +13,7 @@ import (
 // --- generate_trigger_code (core) ---
 
 type GenerateTriggerCodeInput struct {
-	TriggerType string `json:"trigger_type" jsonschema:"required" jsonschema_description:"Type of trigger: time_based spreadsheet_open spreadsheet_edit form_submit document_open,enum=time_based,enum=spreadsheet_open,enum=spreadsheet_edit,enum=form_submit,enum=document_open"`
+	TriggerType  string `json:"trigger_type" jsonschema:"required" jsonschema_description:"Type of trigger: time_based spreadsheet_open spreadsheet_edit form_submit document_open,enum=time_based,enum=spreadsheet_open,enum=spreadsheet_edit,enum=form_submit,enum=document_open"`
 	FunctionName string `json:"function_name" jsonschema:"required" jsonschema_description:"Name of the function to trigger"`
 	Interval     string `json:"interval,omitempty" jsonschema_description:"For time-based triggers: every_minute every_5_minutes every_10_minutes every_15_minutes every_30_minutes hourly daily weekly,enum=every_minute,enum=every_5_minutes,enum=every_10_minutes,enum=every_15_minutes,enum=every_30_minutes,enum=hourly,enum=daily,enum=weekly"`
 }

@@ -97,10 +97,10 @@ type SheetInfo struct {
 }
 
 type GetSpreadsheetInfoOutput struct {
-	Title   string      `json:"title"`
-	URL     string      `json:"url"`
-	Locale  string      `json:"locale"`
-	Sheets  []SheetInfo `json:"sheets"`
+	Title  string      `json:"title"`
+	URL    string      `json:"url"`
+	Locale string      `json:"locale"`
+	Sheets []SheetInfo `json:"sheets"`
 }
 
 func createGetSpreadsheetInfoHandler(factory *services.Factory) mcp.ToolHandlerFor[GetSpreadsheetInfoInput, GetSpreadsheetInfoOutput] {
@@ -139,13 +139,13 @@ func createGetSpreadsheetInfoHandler(factory *services.Factory) mcp.ToolHandlerF
 		}
 
 		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetSpreadsheetInfoOutput{
-			Title:  ss.Properties.Title,
-			URL:    ss.SpreadsheetUrl,
-			Locale: ss.Properties.Locale,
-			Sheets: sheetInfos,
-		}, nil
+				Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
+			}, GetSpreadsheetInfoOutput{
+				Title:  ss.Properties.Title,
+				URL:    ss.SpreadsheetUrl,
+				Locale: ss.Properties.Locale,
+				Sheets: sheetInfos,
+			}, nil
 	}
 }
 
@@ -271,18 +271,18 @@ func createFormatSheetRangeHandler(factory *services.Factory) mcp.ToolHandlerFor
 // --- add_conditional_formatting (extended) ---
 
 type AddConditionalFormattingInput struct {
-	UserEmail     string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	SpreadsheetID string `json:"spreadsheet_id" jsonschema:"required" jsonschema_description:"The spreadsheet ID"`
-	SheetID       int64  `json:"sheet_id" jsonschema:"required" jsonschema_description:"The sheet ID"`
-	StartRow      int64  `json:"start_row" jsonschema:"required" jsonschema_description:"Start row (0-based)"`
-	EndRow        int64  `json:"end_row" jsonschema:"required" jsonschema_description:"End row (exclusive)"`
-	StartCol      int64  `json:"start_col" jsonschema:"required" jsonschema_description:"Start column (0-based)"`
-	EndCol        int64  `json:"end_col" jsonschema:"required" jsonschema_description:"End column (exclusive)"`
-	RuleType      string `json:"rule_type" jsonschema:"required" jsonschema_description:"Rule type: CUSTOM_FORMULA or NUMBER_GREATER,enum=CUSTOM_FORMULA,enum=NUMBER_GREATER,enum=NUMBER_LESS,enum=TEXT_CONTAINS,enum=TEXT_NOT_CONTAINS"`
+	UserEmail     string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	SpreadsheetID string   `json:"spreadsheet_id" jsonschema:"required" jsonschema_description:"The spreadsheet ID"`
+	SheetID       int64    `json:"sheet_id" jsonschema:"required" jsonschema_description:"The sheet ID"`
+	StartRow      int64    `json:"start_row" jsonschema:"required" jsonschema_description:"Start row (0-based)"`
+	EndRow        int64    `json:"end_row" jsonschema:"required" jsonschema_description:"End row (exclusive)"`
+	StartCol      int64    `json:"start_col" jsonschema:"required" jsonschema_description:"Start column (0-based)"`
+	EndCol        int64    `json:"end_col" jsonschema:"required" jsonschema_description:"End column (exclusive)"`
+	RuleType      string   `json:"rule_type" jsonschema:"required" jsonschema_description:"Rule type: CUSTOM_FORMULA or NUMBER_GREATER,enum=CUSTOM_FORMULA,enum=NUMBER_GREATER,enum=NUMBER_LESS,enum=TEXT_CONTAINS,enum=TEXT_NOT_CONTAINS"`
 	Values        []string `json:"values" jsonschema:"required" jsonschema_description:"Condition values (formula for CUSTOM_FORMULA or threshold values)"`
-	BgColor       string `json:"background_color,omitempty" jsonschema_description:"Background color to apply (#RRGGBB)"`
-	TextColor     string `json:"text_color,omitempty" jsonschema_description:"Text color to apply (#RRGGBB)"`
-	Bold          *bool  `json:"bold,omitempty" jsonschema_description:"Make matching text bold"`
+	BgColor       string   `json:"background_color,omitempty" jsonschema_description:"Background color to apply (#RRGGBB)"`
+	TextColor     string   `json:"text_color,omitempty" jsonschema_description:"Text color to apply (#RRGGBB)"`
+	Bold          *bool    `json:"bold,omitempty" jsonschema_description:"Make matching text bold"`
 }
 
 func createAddConditionalFormattingHandler(factory *services.Factory) mcp.ToolHandlerFor[AddConditionalFormattingInput, any] {
@@ -362,17 +362,17 @@ func createAddConditionalFormattingHandler(factory *services.Factory) mcp.ToolHa
 // --- update_conditional_formatting (extended) ---
 
 type UpdateConditionalFormattingInput struct {
-	UserEmail     string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	SpreadsheetID string `json:"spreadsheet_id" jsonschema:"required" jsonschema_description:"The spreadsheet ID"`
-	RuleIndex     int64  `json:"rule_index" jsonschema:"required" jsonschema_description:"Index of the rule to update (0-based)"`
-	SheetID       int64  `json:"sheet_id" jsonschema:"required" jsonschema_description:"The sheet ID"`
-	StartRow      int64  `json:"start_row" jsonschema:"required" jsonschema_description:"Start row (0-based)"`
-	EndRow        int64  `json:"end_row" jsonschema:"required" jsonschema_description:"End row (exclusive)"`
-	StartCol      int64  `json:"start_col" jsonschema:"required" jsonschema_description:"Start column (0-based)"`
-	EndCol        int64  `json:"end_col" jsonschema:"required" jsonschema_description:"End column (exclusive)"`
-	RuleType      string `json:"rule_type" jsonschema:"required" jsonschema_description:"Rule type"`
+	UserEmail     string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	SpreadsheetID string   `json:"spreadsheet_id" jsonschema:"required" jsonschema_description:"The spreadsheet ID"`
+	RuleIndex     int64    `json:"rule_index" jsonschema:"required" jsonschema_description:"Index of the rule to update (0-based)"`
+	SheetID       int64    `json:"sheet_id" jsonschema:"required" jsonschema_description:"The sheet ID"`
+	StartRow      int64    `json:"start_row" jsonschema:"required" jsonschema_description:"Start row (0-based)"`
+	EndRow        int64    `json:"end_row" jsonschema:"required" jsonschema_description:"End row (exclusive)"`
+	StartCol      int64    `json:"start_col" jsonschema:"required" jsonschema_description:"Start column (0-based)"`
+	EndCol        int64    `json:"end_col" jsonschema:"required" jsonschema_description:"End column (exclusive)"`
+	RuleType      string   `json:"rule_type" jsonschema:"required" jsonschema_description:"Rule type"`
 	Values        []string `json:"values" jsonschema:"required" jsonschema_description:"Condition values"`
-	BgColor       string `json:"background_color,omitempty" jsonschema_description:"Background color (#RRGGBB)"`
+	BgColor       string   `json:"background_color,omitempty" jsonschema_description:"Background color (#RRGGBB)"`
 }
 
 func createUpdateConditionalFormattingHandler(factory *services.Factory) mcp.ToolHandlerFor[UpdateConditionalFormattingInput, any] {
@@ -495,7 +495,7 @@ func parseSheetColor(hex string) *sheets.Color {
 }
 
 func trimHash(s string) string {
-	if len(s) > 0 && s[0] == '#' {
+	if s != "" && s[0] == '#' {
 		return s[1:]
 	}
 	return s
@@ -527,4 +527,3 @@ func joinFields(fields []string) string {
 	}
 	return result
 }
-

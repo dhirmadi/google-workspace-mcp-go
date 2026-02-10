@@ -23,8 +23,8 @@ type DocContentOutput struct {
 
 // DocStructureOutput is the structured output for inspect_doc_structure.
 type DocStructureOutput struct {
-	DocumentID string            `json:"document_id"`
-	Title      string            `json:"title"`
+	DocumentID string             `json:"document_id"`
+	Title      string             `json:"title"`
 	Elements   []StructureElement `json:"elements"`
 }
 
@@ -94,7 +94,8 @@ func extractStructureElements(doc *docspb.Document) []StructureElement {
 			EndIndex:   elem.EndIndex,
 		}
 
-		if elem.Paragraph != nil {
+		switch {
+		case elem.Paragraph != nil:
 			se.Type = "paragraph"
 			var content strings.Builder
 			for _, pe := range elem.Paragraph.Elements {
@@ -106,11 +107,11 @@ func extractStructureElements(doc *docspb.Document) []StructureElement {
 			if elem.Paragraph.ParagraphStyle != nil && elem.Paragraph.ParagraphStyle.NamedStyleType != "" {
 				se.Type = fmt.Sprintf("paragraph(%s)", elem.Paragraph.ParagraphStyle.NamedStyleType)
 			}
-		} else if elem.Table != nil {
+		case elem.Table != nil:
 			se.Type = fmt.Sprintf("table(%dx%d)", elem.Table.Rows, elem.Table.Columns)
-		} else if elem.SectionBreak != nil {
+		case elem.SectionBreak != nil:
 			se.Type = "section_break"
-		} else if elem.TableOfContents != nil {
+		case elem.TableOfContents != nil:
 			se.Type = "table_of_contents"
 		}
 

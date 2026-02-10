@@ -200,8 +200,8 @@ func createSearchChatMessagesHandler(factory *services.Factory) mcp.ToolHandlerF
 			return nil, SearchChatMessagesOutput{}, middleware.HandleGoogleAPIError(err)
 		}
 
-		call := srv.Spaces.Messages.List(fmt.Sprintf("spaces/-")).
-			Filter(fmt.Sprintf("text:\"%s\"", input.Query)).
+		call := srv.Spaces.Messages.List("spaces/-").
+			Filter(fmt.Sprintf("text:%q", input.Query)).
 			PageSize(int64(input.PageSize)).
 			Context(ctx)
 

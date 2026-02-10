@@ -369,9 +369,9 @@ func createDeleteEventHandler(factory *services.Factory) mcp.ToolHandlerFor[Dele
 // --- query_freebusy (extended) ---
 
 type QueryFreeBusyInput struct {
-	UserEmail  string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	TimeMin    string   `json:"time_min" jsonschema:"required" jsonschema_description:"Start of time range (RFC3339)"`
-	TimeMax    string   `json:"time_max" jsonschema:"required" jsonschema_description:"End of time range (RFC3339)"`
+	UserEmail   string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	TimeMin     string   `json:"time_min" jsonschema:"required" jsonschema_description:"Start of time range (RFC3339)"`
+	TimeMax     string   `json:"time_max" jsonschema:"required" jsonschema_description:"End of time range (RFC3339)"`
 	CalendarIDs []string `json:"calendar_ids,omitempty" jsonschema_description:"Calendar IDs to check (default: primary)"`
 }
 

@@ -6,10 +6,17 @@ import (
 	"net/http"
 )
 
+// ClientInvalidator is called after successful OAuth to clear cached API clients.
+type ClientInvalidator interface {
+	InvalidateClient(userEmail string)
+}
+
 // OAuthCallbackHandler returns an http.HandlerFunc that handles the OAuth 2.0 callback.
 // It exchanges the authorization code for a token and persists it.
 // The state parameter carries the user's email address.
-func OAuthCallbackHandler(oauthMgr *OAuthManager) http.HandlerFunc {
+// If invalidator is non-nil, cached API clients are evicted on successful auth
+// so the next call picks up the fresh token.
+func OAuthCallbackHandler(oauthMgr *OAuthManager, invalidator ClientInvalidator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
 		state := r.URL.Query().Get("state") // user email
@@ -47,6 +54,13 @@ func OAuthCallbackHandler(oauthMgr *OAuthManager) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, renderErrorPage(fmt.Sprintf("Token exchange failed: %v", err)))
 			return
+		}
+
+		// Evict any cached HTTP client so the next API call rebuilds from
+		// the freshly persisted token instead of reusing a stale one.
+		if invalidator != nil {
+			invalidator.InvalidateClient(state)
+			slog.Info("invalidated cached client after re-auth", "email", state)
 		}
 
 		slog.Info("OAuth authentication successful", "email", state)

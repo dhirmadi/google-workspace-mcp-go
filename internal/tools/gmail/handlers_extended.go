@@ -472,14 +472,14 @@ func createListFiltersHandler(factory *services.Factory) mcp.ToolHandlerFor[List
 // --- create_gmail_filter (extended) ---
 
 type CreateFilterInput struct {
-	UserEmail     string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	From          string   `json:"from,omitempty" jsonschema_description:"Match messages from this sender"`
-	To            string   `json:"to,omitempty" jsonschema_description:"Match messages to this recipient"`
-	Subject       string   `json:"subject,omitempty" jsonschema_description:"Match messages with this subject"`
-	Query         string   `json:"query,omitempty" jsonschema_description:"Match messages with this query"`
-	AddLabelIDs   []string `json:"add_label_ids,omitempty" jsonschema_description:"Label IDs to add to matching messages"`
+	UserEmail      string   `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	From           string   `json:"from,omitempty" jsonschema_description:"Match messages from this sender"`
+	To             string   `json:"to,omitempty" jsonschema_description:"Match messages to this recipient"`
+	Subject        string   `json:"subject,omitempty" jsonschema_description:"Match messages with this subject"`
+	Query          string   `json:"query,omitempty" jsonschema_description:"Match messages with this query"`
+	AddLabelIDs    []string `json:"add_label_ids,omitempty" jsonschema_description:"Label IDs to add to matching messages"`
 	RemoveLabelIDs []string `json:"remove_label_ids,omitempty" jsonschema_description:"Label IDs to remove from matching messages"`
-	Forward       string   `json:"forward,omitempty" jsonschema_description:"Email address to forward matching messages to"`
+	Forward        string   `json:"forward,omitempty" jsonschema_description:"Email address to forward matching messages to"`
 }
 
 func createCreateFilterHandler(factory *services.Factory) mcp.ToolHandlerFor[CreateFilterInput, any] {
@@ -552,4 +552,3 @@ func createDeleteFilterHandler(factory *services.Factory) mcp.ToolHandlerFor[Del
 		}, nil, nil
 	}
 }
-
