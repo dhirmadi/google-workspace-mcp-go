@@ -125,7 +125,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		// Use a mux to route /oauth/callback separately from MCP
 		mux := http.NewServeMux()
 		mux.Handle("/mcp", mcpHandler)
-		mux.HandleFunc("/oauth/callback", auth.OAuthCallbackHandler(oauthMgr))
+		mux.HandleFunc("/oauth/callback", auth.OAuthCallbackHandler(oauthMgr, factory))
 
 		addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 		httpServer := &http.Server{

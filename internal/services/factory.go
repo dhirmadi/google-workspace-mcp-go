@@ -43,6 +43,9 @@ func NewFactory(oauthMgr *auth.OAuthManager) *Factory {
 }
 
 // clientFor returns a cached, auto-refreshing HTTP client for the user.
+// IMPORTANT: Uses context.Background() for the cached HTTP client/token source
+// so they outlive any single request context. Individual API calls pass their
+// own request context via .Context(ctx) on each Google API call.
 func (f *Factory) clientFor(ctx context.Context, userEmail string) (*http.Client, error) {
 	// Fast path: check cache
 	f.mu.RLock()
@@ -66,16 +69,30 @@ func (f *Factory) clientFor(ctx context.Context, userEmail string) (*http.Client
 		return nil, err
 	}
 
-	baseSource := f.oauthConfig.TokenSource(ctx, token)
+	// Use context.Background() for the token source and HTTP client so they
+	// outlive the originating request. Each Google API call passes its own
+	// request-scoped context via .Context(ctx).Do(), which correctly controls
+	// the lifetime of individual HTTP requests.
+	bgCtx := context.Background()
+	baseSource := f.oauthConfig.TokenSource(bgCtx, token)
 	reuseSource := oauth2.ReuseTokenSource(token, &auth.PersistingTokenSource{
 		Base:      baseSource,
 		Store:     f.tokenStore,
 		UserEmail: userEmail,
 	})
 
-	client = oauth2.NewClient(ctx, reuseSource)
+	client = oauth2.NewClient(bgCtx, reuseSource)
 	f.clients[userEmail] = client
 	return client, nil
+}
+
+// InvalidateClient removes the cached HTTP client for a user, forcing the
+// next API call to rebuild it from the latest persisted token. Call this
+// after re-authentication to ensure fresh credentials are picked up.
+func (f *Factory) InvalidateClient(userEmail string) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	delete(f.clients, userEmail)
 }
 
 // Gmail returns a Gmail service client for the given user.
