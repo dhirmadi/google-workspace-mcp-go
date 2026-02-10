@@ -319,6 +319,7 @@ type ImportToDocInput struct {
 	UserEmail string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
 	FileID    string `json:"file_id" jsonschema:"required" jsonschema_description:"The Google Drive file ID to import"`
 	Title     string `json:"title,omitempty" jsonschema_description:"Title for the new Google Doc"`
+	FolderID  string `json:"folder_id,omitempty" jsonschema_description:"Destination folder ID for the new Google Doc. If omitted, the file is created in the user's My Drive root."`
 }
 
 func createImportToDocHandler(factory *services.Factory) mcp.ToolHandlerFor[ImportToDocInput, any] {
@@ -348,9 +349,13 @@ func createImportToDocHandler(factory *services.Factory) mcp.ToolHandlerFor[Impo
 			Name:     title,
 			MimeType: "application/vnd.google-apps.document",
 		}
-		if len(original.Parents) > 0 {
+		if input.FolderID != "" {
+			copiedFile.Parents = []string{input.FolderID}
+		} else if len(original.Parents) > 0 {
 			copiedFile.Parents = original.Parents
 		}
+		// Note: if neither folder_id nor original parents are available,
+		// the file is created in the user's My Drive root by default.
 
 		created, err := srv.Files.Copy(input.FileID, copiedFile).
 			Fields("id, name, mimeType, webViewLink").

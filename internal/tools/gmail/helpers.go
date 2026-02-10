@@ -24,7 +24,7 @@ type MessageSummary struct {
 	LabelIDs []string `json:"label_ids,omitempty"`
 }
 
-// AttachmentInfo describes an attachment on a Gmail message.
+// AttachmentInfo describes a single attachment on a Gmail message.
 type AttachmentInfo struct {
 	AttachmentID string `json:"attachment_id"`
 	Filename     string `json:"filename"`
@@ -180,6 +180,7 @@ func messageToDetail(msg *gmail.Message) MessageDetail {
 	if msg.Payload != nil {
 		attachments = extractAttachments(msg.Payload)
 	}
+
 	return MessageDetail{
 		ID:          msg.Id,
 		ThreadID:    msg.ThreadId,
