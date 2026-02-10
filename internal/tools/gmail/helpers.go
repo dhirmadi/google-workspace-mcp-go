@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"mime"
 	"strings"
 
 	"google.golang.org/api/gmail/v1"
@@ -198,8 +199,15 @@ func messageToDetail(msg *gmail.Message) MessageDetail {
 
 // buildRawMessage builds an RFC 2822 message for the Gmail API.
 // Returns base64url-encoded raw message.
+//
+// The Subject header is RFC 2047 encoded to safely handle non-ASCII characters.
+// The body declares Content-Transfer-Encoding: 8bit so UTF-8 content is
+// transported correctly through mail servers.
 func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references string) string {
 	var msg strings.Builder
+
+	// RFC 2047 Q-encoding for headers that may contain non-ASCII characters.
+	enc := mime.QEncoding
 
 	msg.WriteString(fmt.Sprintf("To: %s\r\n", to))
 	if cc != "" {
@@ -208,7 +216,7 @@ func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references
 	if bcc != "" {
 		msg.WriteString(fmt.Sprintf("Bcc: %s\r\n", bcc))
 	}
-	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", enc.Encode("UTF-8", subject)))
 
 	if inReplyTo != "" {
 		msg.WriteString(fmt.Sprintf("In-Reply-To: %s\r\n", inReplyTo))
@@ -219,6 +227,7 @@ func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references
 
 	msg.WriteString("MIME-Version: 1.0\r\n")
 	msg.WriteString("Content-Type: text/plain; charset=\"UTF-8\"\r\n")
+	msg.WriteString("Content-Transfer-Encoding: 8bit\r\n")
 	msg.WriteString("\r\n")
 	msg.WriteString(body)
 

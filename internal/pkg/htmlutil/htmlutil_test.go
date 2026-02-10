@@ -46,6 +46,30 @@ func TestToPlainTextEntities(t *testing.T) {
 	}
 }
 
+func TestToPlainTextNumericEntities(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"decimal entity", "&#8212; em dash", "— em dash"},
+		{"hex entity lowercase", "&#x2019; curly quote", "\u2019 curly quote"},
+		{"hex entity uppercase", "&#x2018; curly quote", "\u2018 curly quote"},
+		{"star entity", "&#9733; star", "★ star"},
+		{"emoji hex entity", "&#x1F600; grin", "\U0001F600 grin"},
+		{"mixed entities", "&amp; &#38; &#x26;", "& & &"},
+		{"entity in HTML", "<p>Price: &#8364;10</p>", "Price: €10"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ToPlainText(tt.input)
+			if got != tt.want {
+				t.Errorf("ToPlainText(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestToPlainTextStripStyleScript(t *testing.T) {
 	input := `<style>body { color: red; }</style><p>Hello</p><script>alert("x")</script>`
 	got := ToPlainText(input)

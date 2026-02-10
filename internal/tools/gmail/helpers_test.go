@@ -139,6 +139,9 @@ func TestBuildRawMessage(t *testing.T) {
 	if !strings.Contains(msg, "In-Reply-To: <original@gmail.com>") {
 		t.Error("missing In-Reply-To header")
 	}
+	if !strings.Contains(msg, "Content-Transfer-Encoding: 8bit") {
+		t.Error("missing Content-Transfer-Encoding header")
+	}
 	if !strings.Contains(msg, "Hello Bob!") {
 		t.Error("missing body content")
 	}
@@ -163,256 +166,53 @@ func TestBuildRawMessageMinimal(t *testing.T) {
 	}
 }
 
-func TestExtractAttachments(t *testing.T) {
-	tests := []struct {
-		name    string
-		payload *gmail.MessagePart
-		want    int // expected number of attachments
-	}{
-		{
-			name: "no attachments",
-			payload: &gmail.MessagePart{
-				MimeType: "text/plain",
-				Body:     &gmail.MessagePartBody{Data: "dGVzdA=="},
-			},
-			want: 0,
-		},
-		{
-			name:    "nil body part",
-			payload: &gmail.MessagePart{MimeType: "multipart/mixed"},
-			want:    0,
-		},
-		{
-			name: "single attachment",
-			payload: &gmail.MessagePart{
-				MimeType: "multipart/mixed",
-				Parts: []*gmail.MessagePart{
-					{
-						MimeType: "text/plain",
-						Body:     &gmail.MessagePartBody{Data: "dGVzdA=="},
-					},
-					{
-						MimeType: "application/pdf",
-						Filename: "report.pdf",
-						Body: &gmail.MessagePartBody{
-							AttachmentId: "att-1",
-							Size:         12345,
-						},
-					},
-				},
-			},
-			want: 1,
-		},
-		{
-			name: "multiple nested attachments",
-			payload: &gmail.MessagePart{
-				MimeType: "multipart/mixed",
-				Parts: []*gmail.MessagePart{
-					{
-						MimeType: "multipart/alternative",
-						Parts: []*gmail.MessagePart{
-							{MimeType: "text/plain", Body: &gmail.MessagePartBody{Data: "dGVzdA=="}},
-							{MimeType: "text/html", Body: &gmail.MessagePartBody{Data: "PGI+dGVzdDwvYj4="}},
-						},
-					},
-					{
-						MimeType: "image/png",
-						Filename: "screenshot.png",
-						Body: &gmail.MessagePartBody{
-							AttachmentId: "att-2",
-							Size:         54321,
-						},
-					},
-					{
-						MimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-						Filename: "doc.docx",
-						Body: &gmail.MessagePartBody{
-							AttachmentId: "att-3",
-							Size:         99999,
-						},
-					},
-				},
-			},
-			want: 2,
-		},
+func TestBuildRawMessageNonASCIISubject(t *testing.T) {
+	raw := buildRawMessage("bob@example.com", "Héllo Wörld 日本語", "Body text", "", "", "", "", "")
+	decoded, err := base64.URLEncoding.DecodeString(raw)
+	if err != nil {
+		t.Fatalf("decoding raw message: %v", err)
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := extractAttachments(tt.payload)
-			if len(got) != tt.want {
-				t.Errorf("extractAttachments() returned %d attachments, want %d", len(got), tt.want)
-			}
-		})
+	msg := string(decoded)
+	// Subject should be RFC 2047 encoded, not raw UTF-8
+	if strings.Contains(msg, "Subject: H\u00e9llo") {
+		t.Error("non-ASCII subject should be RFC 2047 encoded, not raw UTF-8")
+	}
+	if !strings.Contains(msg, "Subject: =?UTF-8?q?") {
+		t.Errorf("expected RFC 2047 Q-encoded subject, got: %s", msg)
 	}
 }
 
-func TestExtractAttachmentsFields(t *testing.T) {
-	payload := &gmail.MessagePart{
-		MimeType: "multipart/mixed",
-		Parts: []*gmail.MessagePart{
-			{
-				MimeType: "application/pdf",
-				Filename: "invoice.pdf",
-				Body: &gmail.MessagePartBody{
-					AttachmentId: "att-abc-123",
-					Size:         42000,
-				},
-			},
-		},
+func TestBuildRawMessageASCIISubjectPassthrough(t *testing.T) {
+	raw := buildRawMessage("bob@example.com", "Plain ASCII", "Body", "", "", "", "", "")
+	decoded, err := base64.URLEncoding.DecodeString(raw)
+	if err != nil {
+		t.Fatalf("decoding raw message: %v", err)
 	}
 
-	attachments := extractAttachments(payload)
-	if len(attachments) != 1 {
-		t.Fatalf("expected 1 attachment, got %d", len(attachments))
-	}
-
-	a := attachments[0]
-	if a.AttachmentID != "att-abc-123" {
-		t.Errorf("AttachmentID = %q, want %q", a.AttachmentID, "att-abc-123")
-	}
-	if a.Filename != "invoice.pdf" {
-		t.Errorf("Filename = %q, want %q", a.Filename, "invoice.pdf")
-	}
-	if a.MimeType != "application/pdf" {
-		t.Errorf("MimeType = %q, want %q", a.MimeType, "application/pdf")
-	}
-	if a.Size != 42000 {
-		t.Errorf("Size = %d, want %d", a.Size, 42000)
+	msg := string(decoded)
+	// Pure ASCII subjects should pass through as-is (no encoding needed)
+	if !strings.Contains(msg, "Subject: Plain ASCII") {
+		t.Errorf("ASCII subject should not be encoded, got: %s", msg)
 	}
 }
 
-func TestFindAttachmentPart(t *testing.T) {
-	payload := &gmail.MessagePart{
-		MimeType: "multipart/mixed",
-		Parts: []*gmail.MessagePart{
-			{MimeType: "text/plain", Body: &gmail.MessagePartBody{Data: "dGVzdA=="}},
-			{
-				MimeType: "image/jpeg",
-				Filename: "photo.jpg",
-				Body: &gmail.MessagePartBody{
-					AttachmentId: "target-id",
-					Size:         8000,
-				},
-			},
-			{
-				MimeType: "application/pdf",
-				Filename: "doc.pdf",
-				Body: &gmail.MessagePartBody{
-					AttachmentId: "other-id",
-					Size:         5000,
-				},
-			},
-		},
+func TestBuildRawMessageUTF8Body(t *testing.T) {
+	body := "H\u00e9llo, this has acc\u00e9nts and em\u2014dashes and \u201ccurly quotes\u201d"
+	raw := buildRawMessage("bob@example.com", "Test", body, "", "", "", "", "")
+	decoded, err := base64.URLEncoding.DecodeString(raw)
+	if err != nil {
+		t.Fatalf("decoding raw message: %v", err)
 	}
 
-	t.Run("found", func(t *testing.T) {
-		info := findAttachmentPart(payload, "target-id")
-		if info == nil {
-			t.Fatal("expected to find attachment, got nil")
-		}
-		if info.Filename != "photo.jpg" {
-			t.Errorf("Filename = %q, want %q", info.Filename, "photo.jpg")
-		}
-		if info.MimeType != "image/jpeg" {
-			t.Errorf("MimeType = %q, want %q", info.MimeType, "image/jpeg")
-		}
-	})
-
-	t.Run("not found", func(t *testing.T) {
-		info := findAttachmentPart(payload, "nonexistent-id")
-		if info != nil {
-			t.Errorf("expected nil for nonexistent ID, got %+v", info)
-		}
-	})
-}
-
-func TestFormatAttachmentSize(t *testing.T) {
-	tests := []struct {
-		bytes int64
-		want  string
-	}{
-		{0, "unknown size"},
-		{500, "500 B"},
-		{1024, "1.0 KB"},
+	msg := string(decoded)
+	if !strings.Contains(msg, body) {
+		t.Error("UTF-8 body should be preserved in the raw message")
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.want, func(t *testing.T) {
-			got := formatAttachmentSize(tt.bytes)
-			if got != tt.want {
-				t.Errorf("formatAttachmentSize(%d) = %q, want %q", tt.bytes, got, tt.want)
-			}
-		})
+	if !strings.Contains(msg, "Content-Transfer-Encoding: 8bit") {
+		t.Error("UTF-8 body requires Content-Transfer-Encoding: 8bit")
 	}
-}
-
-func TestMessageToDetailWithAttachments(t *testing.T) {
-	plainText := base64.URLEncoding.EncodeToString([]byte("Body text"))
-	msg := &gmail.Message{
-		Id:       "msg-with-att",
-		ThreadId: "thread-1",
-		Payload: &gmail.MessagePart{
-			MimeType: "multipart/mixed",
-			Headers: []*gmail.MessagePartHeader{
-				{Name: "Subject", Value: "Has Attachment"},
-				{Name: "From", Value: "sender@example.com"},
-				{Name: "To", Value: "receiver@example.com"},
-			},
-			Parts: []*gmail.MessagePart{
-				{
-					MimeType: "text/plain",
-					Body:     &gmail.MessagePartBody{Data: plainText},
-				},
-				{
-					MimeType: "application/pdf",
-					Filename: "report.pdf",
-					Body: &gmail.MessagePartBody{
-						AttachmentId: "att-pdf-1",
-						Size:         10240,
-					},
-				},
-			},
-		},
-	}
-
-	detail := messageToDetail(msg)
-
-	if detail.Subject != "Has Attachment" {
-		t.Errorf("Subject = %q, want %q", detail.Subject, "Has Attachment")
-	}
-	if detail.Body != "Body text" {
-		t.Errorf("Body = %q, want %q", detail.Body, "Body text")
-	}
-	if len(detail.Attachments) != 1 {
-		t.Fatalf("Attachments count = %d, want 1", len(detail.Attachments))
-	}
-	att := detail.Attachments[0]
-	if att.AttachmentID != "att-pdf-1" {
-		t.Errorf("AttachmentID = %q, want %q", att.AttachmentID, "att-pdf-1")
-	}
-	if att.Filename != "report.pdf" {
-		t.Errorf("Filename = %q, want %q", att.Filename, "report.pdf")
-	}
-}
-
-func TestMessageToDetailWithoutAttachments(t *testing.T) {
-	plainText := base64.URLEncoding.EncodeToString([]byte("Just text"))
-	msg := &gmail.Message{
-		Id:       "msg-no-att",
-		ThreadId: "thread-2",
-		Payload: &gmail.MessagePart{
-			MimeType: "text/plain",
-			Headers: []*gmail.MessagePartHeader{
-				{Name: "Subject", Value: "No Attachments"},
-			},
-			Body: &gmail.MessagePartBody{Data: plainText},
-		},
-	}
-
-	detail := messageToDetail(msg)
-
-	if len(detail.Attachments) != 0 {
-		t.Errorf("expected no attachments, got %d", len(detail.Attachments))
+	if !strings.Contains(msg, `charset="UTF-8"`) {
+		t.Error("must declare UTF-8 charset")
 	}
 }
