@@ -1,12 +1,14 @@
 package gmail
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"strings"
 
 	"google.golang.org/api/gmail/v1"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/format"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/htmlutil"
 )
 
@@ -97,6 +99,67 @@ func findBodyPart(part *gmail.MessagePart, mimeType string) string {
 	return ""
 }
 
+// extractAttachments recursively collects attachment metadata from message parts.
+func extractAttachments(part *gmail.MessagePart) []AttachmentInfo {
+	var result []AttachmentInfo
+	if part.Body != nil && part.Body.AttachmentId != "" {
+		result = append(result, AttachmentInfo{
+			AttachmentID: part.Body.AttachmentId,
+			Filename:     part.Filename,
+			MimeType:     part.MimeType,
+			Size:         part.Body.Size,
+		})
+	}
+	for _, child := range part.Parts {
+		result = append(result, extractAttachments(child)...)
+	}
+	return result
+}
+
+// findAttachmentPart recursively locates the MessagePart matching the given attachment ID.
+func findAttachmentPart(part *gmail.MessagePart, attachmentID string) *AttachmentInfo {
+	if part.Body != nil && part.Body.AttachmentId == attachmentID {
+		return &AttachmentInfo{
+			AttachmentID: attachmentID,
+			Filename:     part.Filename,
+			MimeType:     part.MimeType,
+			Size:         part.Body.Size,
+		}
+	}
+	for _, child := range part.Parts {
+		if info := findAttachmentPart(child, attachmentID); info != nil {
+			return info
+		}
+	}
+	return nil
+}
+
+// resolveAttachmentMeta fetches the parent message to find the MIME type and
+// filename for a given attachment ID. Returns sensible defaults on failure.
+func resolveAttachmentMeta(ctx context.Context, srv *gmail.Service, userEmail, messageID, attachmentID string) (mimeType, filename string) {
+	msg, err := srv.Users.Messages.Get(userEmail, messageID).
+		Format("full").
+		Fields("payload").
+		Context(ctx).
+		Do()
+	if err != nil || msg.Payload == nil {
+		return "application/octet-stream", "attachment"
+	}
+	if info := findAttachmentPart(msg.Payload, attachmentID); info != nil {
+		return info.MimeType, info.Filename
+	}
+	return "application/octet-stream", "attachment"
+}
+
+// formatAttachmentSize returns a human-readable size string.
+// Returns "unknown size" for zero bytes (unlike format.ByteSize which returns "").
+func formatAttachmentSize(bytes int64) string {
+	if s := format.ByteSize(bytes); s != "" {
+		return s
+	}
+	return "unknown size"
+}
+
 // messageToSummary converts a Gmail message to a compact summary.
 func messageToSummary(msg *gmail.Message) MessageSummary {
 	return MessageSummary{
@@ -109,26 +172,6 @@ func messageToSummary(msg *gmail.Message) MessageSummary {
 		Snippet:  msg.Snippet,
 		LabelIDs: msg.LabelIds,
 	}
-}
-
-// extractAttachments recursively walks message parts and collects attachment metadata.
-func extractAttachments(part *gmail.MessagePart) []AttachmentInfo {
-	var attachments []AttachmentInfo
-
-	if part.Filename != "" && part.Body != nil && part.Body.AttachmentId != "" {
-		attachments = append(attachments, AttachmentInfo{
-			AttachmentID: part.Body.AttachmentId,
-			Filename:     part.Filename,
-			MimeType:     part.MimeType,
-			Size:         part.Body.Size,
-		})
-	}
-
-	for _, child := range part.Parts {
-		attachments = append(attachments, extractAttachments(child)...)
-	}
-
-	return attachments
 }
 
 // messageToDetail converts a Gmail message to full detail including body.

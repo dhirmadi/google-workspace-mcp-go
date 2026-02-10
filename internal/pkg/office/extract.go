@@ -12,6 +12,14 @@ import (
 // MaxFileSize is the maximum file size to attempt extraction on (50 MB).
 const MaxFileSize = 50 * 1024 * 1024
 
+// IsOfficeType returns true if the MIME type is a Microsoft Office XML format.
+func IsOfficeType(mimeType string) bool {
+	return strings.Contains(mimeType, "officedocument") ||
+		strings.HasSuffix(mimeType, ".docx") ||
+		strings.HasSuffix(mimeType, ".xlsx") ||
+		strings.HasSuffix(mimeType, ".pptx")
+}
+
 // ExtractText extracts plain text from Office XML documents (.docx, .xlsx, .pptx).
 // The data must be the raw ZIP-based Office file content.
 func ExtractText(data []byte, mimeType string) (string, error) {

@@ -105,15 +105,6 @@ func TestIsGoogleNativeType(t *testing.T) {
 	}
 }
 
-func TestIsOfficeType(t *testing.T) {
-	if !isOfficeType("application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-		t.Error("expected docx to be office type")
-	}
-	if isOfficeType("text/plain") {
-		t.Error("expected text/plain to NOT be office type")
-	}
-}
-
 func TestMimeTypeForExport(t *testing.T) {
 	got := mimeTypeForExport("application/vnd.google-apps.document")
 	if got != "text/plain" {

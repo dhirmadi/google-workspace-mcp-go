@@ -95,7 +95,10 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	}, nil)
 
 	// Wire SDK middleware
-	server.AddReceivingMiddleware(middleware.LoggingMiddleware(logger))
+	server.AddReceivingMiddleware(
+		middleware.LoggingMiddleware(logger),
+		middleware.AuthEnhancerMiddleware(oauthMgr),
+	)
 
 	// Register all tools through the registry
 	registry.RegisterAll(server, factory, cfg, tierMap, oauthMgr)

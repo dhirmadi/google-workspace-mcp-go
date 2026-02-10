@@ -147,6 +147,14 @@ func createGetMessageContentHandler(factory *services.Factory) mcp.ToolHandlerFo
 		rb.Blank()
 		rb.Section("Body")
 		rb.Raw(detail.Body)
+		if len(detail.Attachments) > 0 {
+			rb.Blank()
+			rb.Section("Attachments (%d)", len(detail.Attachments))
+			for _, a := range detail.Attachments {
+				rb.Item("%s (%s, %s)", a.Filename, a.MimeType, formatAttachmentSize(a.Size))
+				rb.Line("    Attachment ID: %s", a.AttachmentID)
+			}
+		}
 
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
@@ -227,6 +235,14 @@ func createBatchGetMessagesHandler(factory *services.Factory) mcp.ToolHandlerFor
 			}
 			rb.Blank()
 			rb.Raw(m.Body)
+			if len(m.Attachments) > 0 {
+				rb.Blank()
+				rb.Section("Attachments (%d)", len(m.Attachments))
+				for _, a := range m.Attachments {
+					rb.Item("%s (%s, %s)", a.Filename, a.MimeType, formatAttachmentSize(a.Size))
+					rb.Line("    Attachment ID: %s", a.AttachmentID)
+				}
+			}
 			rb.Blank()
 		}
 

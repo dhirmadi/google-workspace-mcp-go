@@ -2,13 +2,16 @@ package gmail
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/gmail/v1"
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/office"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
@@ -34,22 +37,76 @@ func createGetAttachmentHandler(factory *services.Factory) mcp.ToolHandlerFor[Ge
 			return nil, GetAttachmentOutput{}, middleware.HandleGoogleAPIError(err)
 		}
 
+		// Fetch raw attachment data
 		attachment, err := srv.Users.Messages.Attachments.Get(input.UserEmail, input.MessageID, input.AttachmentID).
 			Context(ctx).Do()
 		if err != nil {
 			return nil, GetAttachmentOutput{}, middleware.HandleGoogleAPIError(err)
 		}
 
+		// Resolve MIME type and filename from the parent message
+		mimeType, filename := resolveAttachmentMeta(ctx, srv, input.UserEmail, input.MessageID, input.AttachmentID)
+
+		// Decode base64url data
+		rawData, err := base64.URLEncoding.DecodeString(attachment.Data)
+		if err != nil {
+			return nil, GetAttachmentOutput{}, fmt.Errorf("decoding attachment data: %w", err)
+		}
+
 		rb := response.New()
 		rb.Header("Gmail Attachment")
+		rb.KeyValue("Filename", filename)
+		rb.KeyValue("MIME Type", mimeType)
+		rb.KeyValue("Size", formatAttachmentSize(attachment.Size))
 		rb.KeyValue("Message ID", input.MessageID)
-		rb.KeyValue("Attachment ID", input.AttachmentID)
-		rb.KeyValue("Size", fmt.Sprintf("%d bytes", attachment.Size))
-		rb.Line("Data is base64url-encoded.")
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetAttachmentOutput{Data: attachment.Data, Size: attachment.Size}, nil
+		var contentParts []mcp.Content
+
+		switch {
+		case strings.HasPrefix(mimeType, "image/"):
+			rb.Line("Image attachment returned as inline image content.")
+			contentParts = append(contentParts,
+				&mcp.TextContent{Text: rb.Build()},
+				&mcp.ImageContent{Data: rawData, MIMEType: mimeType},
+			)
+
+		case strings.HasPrefix(mimeType, "text/") ||
+			mimeType == "application/json" ||
+			mimeType == "application/xml" ||
+			mimeType == "application/javascript":
+			text := string(rawData)
+			rb.Blank()
+			rb.Section("Content")
+			rb.Raw(text)
+			contentParts = append(contentParts, &mcp.TextContent{Text: rb.Build()})
+
+		case office.IsOfficeType(mimeType):
+			extracted, extractErr := office.ExtractText(rawData, mimeType)
+			if extractErr != nil {
+				rb.Blank()
+				rb.Line("Could not extract text: %v", extractErr)
+				rb.Line("Raw data available in structured output as base64url.")
+			} else {
+				rb.Blank()
+				rb.Section("Extracted Text")
+				rb.Raw(extracted)
+			}
+			contentParts = append(contentParts, &mcp.TextContent{Text: rb.Build()})
+
+		default:
+			rb.Blank()
+			rb.Line("Binary attachment (%s). Content available in structured output as base64url-encoded data.", mimeType)
+			rb.Line("To process this file, consider saving it to Google Drive first.")
+			contentParts = append(contentParts, &mcp.TextContent{Text: rb.Build()})
+		}
+
+		output := GetAttachmentOutput{
+			Data:     attachment.Data,
+			Size:     attachment.Size,
+			MimeType: mimeType,
+		}
+
+		return &mcp.CallToolResult{Content: contentParts}, output, nil
 	}
 }
 
@@ -102,6 +159,14 @@ func createGetThreadHandler(factory *services.Factory) mcp.ToolHandlerFor[GetThr
 			}
 			rb.Blank()
 			rb.Raw(detail.Body)
+			if len(detail.Attachments) > 0 {
+				rb.Blank()
+				rb.Section("Attachments (%d)", len(detail.Attachments))
+				for _, a := range detail.Attachments {
+					rb.Item("%s (%s, %s)", a.Filename, a.MimeType, formatAttachmentSize(a.Size))
+					rb.Line("    Attachment ID: %s", a.AttachmentID)
+				}
+			}
 			rb.Blank()
 		}
 
