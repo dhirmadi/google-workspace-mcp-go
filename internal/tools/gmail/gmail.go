@@ -28,7 +28,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_gmail_message_content",
 		Icons:       serviceIcons,
-		Description: "Get the full content of a specific Gmail message including subject, sender, recipients, and body text.",
+		Description: "Get the full content of a specific Gmail message including subject, sender, recipients, body text, and attachment metadata (filenames, MIME types, attachment IDs for retrieval).",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Message Content",
 			ReadOnlyHint:  true,
@@ -39,7 +39,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_gmail_messages_content_batch",
 		Icons:       serviceIcons,
-		Description: "Get the content of multiple Gmail messages in a single request. Supports up to 25 messages per batch. Reports progress during retrieval.",
+		Description: "Get the content of multiple Gmail messages in a single request. Supports up to 25 messages per batch. Reports progress during retrieval. Includes attachment metadata when present.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Messages (Batch)",
 			ReadOnlyHint:  true,
@@ -62,7 +62,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_gmail_attachment_content",
 		Icons:       serviceIcons,
-		Description: "Get the content of a Gmail message attachment by attachment ID.",
+		Description: "Get the content of a Gmail message attachment by attachment ID. Automatically extracts text from Office documents (.docx/.xlsx/.pptx) and text files. Returns images as inline image content for vision-capable models. Use get_gmail_message_content first to discover attachment IDs.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Attachment",
 			ReadOnlyHint:  true,
@@ -73,7 +73,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_gmail_thread_content",
 		Icons:       serviceIcons,
-		Description: "Get all messages in a Gmail thread, including full body content for each message.",
+		Description: "Get all messages in a Gmail thread, including full body content and attachment metadata for each message.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Thread",
 			ReadOnlyHint:  true,
