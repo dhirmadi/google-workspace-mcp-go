@@ -75,3 +75,26 @@ func TestExtractTextTooLarge(t *testing.T) {
 		t.Error("expected error for oversized file")
 	}
 }
+
+func TestIsOfficeType(t *testing.T) {
+	tests := []struct {
+		mimeType string
+		want     bool
+	}{
+		{"application/vnd.openxmlformats-officedocument.wordprocessingml.document", true},
+		{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true},
+		{"application/vnd.openxmlformats-officedocument.presentationml.presentation", true},
+		{"application/pdf", false},
+		{"text/plain", false},
+		{"image/png", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.mimeType, func(t *testing.T) {
+			got := IsOfficeType(tt.mimeType)
+			if got != tt.want {
+				t.Errorf("IsOfficeType(%q) = %v, want %v", tt.mimeType, got, tt.want)
+			}
+		})
+	}
+}

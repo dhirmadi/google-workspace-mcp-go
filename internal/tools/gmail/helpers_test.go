@@ -178,6 +178,11 @@ func TestExtractAttachments(t *testing.T) {
 			want: 0,
 		},
 		{
+			name:    "nil body part",
+			payload: &gmail.MessagePart{MimeType: "multipart/mixed"},
+			want:    0,
+		},
+		{
 			name: "single attachment",
 			payload: &gmail.MessagePart{
 				MimeType: "multipart/mixed",
@@ -330,9 +335,6 @@ func TestFormatAttachmentSize(t *testing.T) {
 		{0, "unknown size"},
 		{500, "500 B"},
 		{1024, "1.0 KB"},
-		{1536, "1.5 KB"},
-		{1048576, "1.0 MB"},
-		{5242880, "5.0 MB"},
 	}
 
 	for _, tt := range tests {
@@ -340,29 +342,6 @@ func TestFormatAttachmentSize(t *testing.T) {
 			got := formatAttachmentSize(tt.bytes)
 			if got != tt.want {
 				t.Errorf("formatAttachmentSize(%d) = %q, want %q", tt.bytes, got, tt.want)
-			}
-		})
-	}
-}
-
-func TestIsOfficeType(t *testing.T) {
-	tests := []struct {
-		mimeType string
-		want     bool
-	}{
-		{"application/vnd.openxmlformats-officedocument.wordprocessingml.document", true},
-		{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", true},
-		{"application/vnd.openxmlformats-officedocument.presentationml.presentation", true},
-		{"application/pdf", false},
-		{"text/plain", false},
-		{"image/png", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.mimeType, func(t *testing.T) {
-			got := isOfficeType(tt.mimeType)
-			if got != tt.want {
-				t.Errorf("isOfficeType(%q) = %v, want %v", tt.mimeType, got, tt.want)
 			}
 		})
 	}

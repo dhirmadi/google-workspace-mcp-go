@@ -80,7 +80,7 @@ func createGetAttachmentHandler(factory *services.Factory) mcp.ToolHandlerFor[Ge
 			rb.Raw(text)
 			contentParts = append(contentParts, &mcp.TextContent{Text: rb.Build()})
 
-		case isOfficeType(mimeType):
+		case office.IsOfficeType(mimeType):
 			extracted, extractErr := office.ExtractText(rawData, mimeType)
 			if extractErr != nil {
 				rb.Blank()

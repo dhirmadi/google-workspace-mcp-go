@@ -5,6 +5,9 @@ import (
 	"strings"
 
 	"google.golang.org/api/drive/v3"
+
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/format"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/office"
 )
 
 // FileSummary is a compact representation of a Drive file.
@@ -70,19 +73,7 @@ func formatFileType(mimeType string) string {
 
 // formatSize returns a human-readable file size.
 func formatSize(bytes int64) string {
-	if bytes == 0 {
-		return ""
-	}
-	const unit = 1024
-	if bytes < unit {
-		return fmt.Sprintf("%d B", bytes)
-	}
-	div, exp := int64(unit), 0
-	for n := bytes / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+	return format.ByteSize(bytes)
 }
 
 // permissionToInfo converts a Drive permission to a summary.
@@ -150,8 +141,5 @@ func isGoogleNativeType(mimeType string) bool {
 
 // isOfficeType returns true if the MIME type is a Microsoft Office XML format.
 func isOfficeType(mimeType string) bool {
-	return strings.Contains(mimeType, "officedocument") ||
-		strings.HasSuffix(mimeType, ".docx") ||
-		strings.HasSuffix(mimeType, ".xlsx") ||
-		strings.HasSuffix(mimeType, ".pptx")
+	return office.IsOfficeType(mimeType)
 }
