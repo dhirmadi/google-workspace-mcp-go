@@ -175,16 +175,11 @@ func tierFilterMiddleware(cfg *config.Config, tierMap map[string]config.ToolInfo
 				}, nil
 			}
 
-			// Check read-only mode: block tools that are not marked read-only.
-			if cfg.ReadOnly {
-				if info, ok := tierMap[toolName]; ok {
-					_ = info // tier info available if needed
-				}
-				// We need the tool's annotations to check ReadOnlyHint.
-				// Delegate to next and let the tool execute — the actual
-				// read-only enforcement happens at the annotation level
-				// via the tools/list filter (excluded tools won't be visible).
-			}
+			// Read-only enforcement: write tools are hidden from tools/list via
+			// filterToolPtrList, so well-behaved clients won't call them.
+			// Tool-level annotations (ReadOnlyHint) are not accessible here
+			// at call time without maintaining a parallel registry, so
+			// enforcement is at the listing layer.
 
 			return next(ctx, method, req)
 		}
