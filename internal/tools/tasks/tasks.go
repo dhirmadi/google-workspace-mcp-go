@@ -3,6 +3,7 @@ package tasks
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -23,7 +24,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Task Lists",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListTaskListsHandler(factory))
 
@@ -34,7 +35,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Tasks",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListTasksHandler(factory))
 
@@ -45,7 +46,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Task",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetTaskHandler(factory))
 
@@ -55,7 +56,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new task in a task list. Supports subtasks via parent parameter and positioning via previous parameter.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Task",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateTaskHandler(factory))
 
@@ -66,7 +67,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Task",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateTaskHandler(factory))
 
@@ -78,8 +79,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Permanently delete a task. This action cannot be undone.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Task",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteTaskHandler(factory))
 
@@ -92,7 +93,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Task List",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetTaskListHandler(factory))
 
@@ -102,7 +103,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new task list.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Task List",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateTaskListHandler(factory))
 
@@ -113,7 +114,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Task List",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateTaskListHandler(factory))
 
@@ -123,8 +124,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Permanently delete a task list and all its tasks.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Task List",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteTaskListHandler(factory))
 
@@ -134,7 +135,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Move a task to a new position within its task list, or make it a subtask of another task.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Move Task",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createMoveTaskHandler(factory))
 
@@ -144,8 +145,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Remove all completed tasks from a task list. This cannot be undone.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Clear Completed Tasks",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createClearCompletedTasksHandler(factory))
 }

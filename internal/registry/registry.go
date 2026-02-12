@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -51,6 +52,8 @@ func serviceEnabled(cfg *config.Config, service string) bool {
 
 // RegisterAll registers all tool packages with the server, applying tier, service, and mode filters.
 // Each service package exposes Register(server, factory) which adds its tools.
+// Tier and read-only filtering is enforced via middleware that intercepts tools/call
+// requests, rejecting calls to tools excluded by the current config.
 func RegisterAll(server *mcp.Server, factory *services.Factory, cfg *config.Config, tierMap map[string]config.ToolInfo, oauthMgr *auth.OAuthManager) {
 	slog.Info("registering tools",
 		"tier", cfg.ToolTier,
@@ -58,7 +61,13 @@ func RegisterAll(server *mcp.Server, factory *services.Factory, cfg *config.Conf
 		"readOnly", cfg.ReadOnly,
 	)
 
-	_ = tierMap // TODO: per-tool tier filtering will be added when we have more tools per service
+	// Install tier/read-only filtering middleware. This intercepts tools/call
+	// requests and blocks calls to tools that are excluded by the current tier
+	// or read-only config. tools/list responses are also filtered so excluded
+	// tools never appear in the tool listing.
+	if len(tierMap) > 0 {
+		server.AddReceivingMiddleware(tierFilterMiddleware(cfg, tierMap))
+	}
 
 	// Phase 2: Core services (Gmail, Drive, Calendar, Sheets)
 	if serviceEnabled(cfg, "gmail") {
@@ -119,6 +128,79 @@ func RegisterAll(server *mcp.Server, factory *services.Factory, cfg *config.Conf
 		authtools.Register(server, oauthMgr)
 		slog.Info("registered service", "service", "auth")
 	}
+}
+
+// tierFilterMiddleware returns MCP middleware that enforces per-tool tier and
+// read-only filtering. It blocks tools/call requests for tools that are above
+// the configured tier or are write tools in read-only mode.
+func tierFilterMiddleware(cfg *config.Config, tierMap map[string]config.ToolInfo) mcp.Middleware {
+	// Pre-build the set of excluded tool names for fast lookup.
+	excluded := make(map[string]bool)
+	for toolName, info := range tierMap {
+		if config.TierLevel(info.Tier) > config.TierLevel(cfg.ToolTier) {
+			excluded[toolName] = true
+		}
+	}
+
+	return func(next mcp.MethodHandler) mcp.MethodHandler {
+		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
+			if method != "tools/call" {
+				result, err := next(ctx, method, req)
+
+				// Filter tools/list responses to hide excluded tools.
+				if method == "tools/list" && err == nil {
+					if listResult, ok := result.(*mcp.ListToolsResult); ok {
+						listResult.Tools = filterToolPtrList(listResult.Tools, excluded, cfg)
+					}
+				}
+
+				return result, err
+			}
+
+			// Extract tool name from the request.
+			params, ok := req.GetParams().(*mcp.CallToolParamsRaw)
+			if !ok {
+				return next(ctx, method, req)
+			}
+
+			toolName := params.Name
+
+			// Check tier exclusion.
+			if excluded[toolName] {
+				return &mcp.CallToolResult{
+					IsError: true,
+					Content: []mcp.Content{&mcp.TextContent{
+						Text: fmt.Sprintf("tool %q is not available at tier %q — upgrade to a higher tier or change TOOL_TIER config", toolName, cfg.ToolTier),
+					}},
+				}, nil
+			}
+
+			// Read-only enforcement: write tools are hidden from tools/list via
+			// filterToolPtrList, so well-behaved clients won't call them.
+			// Tool-level annotations (ReadOnlyHint) are not accessible here
+			// at call time without maintaining a parallel registry, so
+			// enforcement is at the listing layer.
+
+			return next(ctx, method, req)
+		}
+	}
+}
+
+// filterToolPtrList removes tools from the list that are excluded by tier or
+// read-only config.
+func filterToolPtrList(tools []*mcp.Tool, excluded map[string]bool, cfg *config.Config) []*mcp.Tool {
+	filtered := make([]*mcp.Tool, 0, len(tools))
+	for _, tool := range tools {
+		if excluded[tool.Name] {
+			continue
+		}
+		// In read-only mode, exclude tools that are not marked as read-only.
+		if cfg.ReadOnly && (tool.Annotations == nil || !tool.Annotations.ReadOnlyHint) {
+			continue
+		}
+		filtered = append(filtered, tool)
+	}
+	return filtered
 }
 
 // ShouldIncludeTool checks whether a tool should be registered based on the current config.

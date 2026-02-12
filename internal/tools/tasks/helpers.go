@@ -51,5 +51,3 @@ func taskToSummary(t *tasks.Task) TaskSummary {
 		Updated:   t.Updated,
 	}
 }
-
-func ptrBool(b bool) *bool { return &b }

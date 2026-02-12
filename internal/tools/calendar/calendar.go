@@ -3,6 +3,7 @@ package calendar
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -21,7 +22,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Calendars",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListCalendarsHandler(factory))
 
@@ -32,7 +33,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Calendar Events",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetEventsHandler(factory))
 
@@ -42,7 +43,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new calendar event with optional attendees, location, reminders, and Google Meet link.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Calendar Event",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateEventHandler(factory))
 
@@ -53,7 +54,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Modify Calendar Event",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createModifyEventHandler(factory))
 
@@ -63,8 +64,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Permanently delete a calendar event. This action cannot be undone.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Calendar Event",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteEventHandler(factory))
 
@@ -77,9 +78,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Query Free/Busy",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createQueryFreeBusyHandler(factory))
 }
-
-func ptrBool(b bool) *bool { return &b }

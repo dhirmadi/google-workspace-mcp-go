@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -183,6 +184,35 @@ func TestAuthEnhancer_SuccessResult_Unchanged(t *testing.T) {
 
 	if text != "Search complete: 5 results" {
 		t.Errorf("successful result should be unchanged, got: %s", text)
+	}
+}
+
+func TestAuthEnhancer_NilResult_NoPanic(t *testing.T) {
+	oauthMgr := testOAuthMgr()
+	mw := AuthEnhancerMiddleware(oauthMgr)
+
+	// Simulate the SDK returning a typed-nil *CallToolResult with an error,
+	// which is what happens when input validation fails before the handler runs.
+	next := func(_ context.Context, _ string, _ mcp.Request) (mcp.Result, error) {
+		var r *mcp.CallToolResult // nil
+		return r, fmt.Errorf("validation failed: missing required field")
+	}
+
+	handler := mw(next)
+	req := fakeToolRequest(`{"user_google_email":"user@test.com"}`)
+
+	// Must not panic.
+	result, err := handler(context.Background(), "tools/call", req)
+
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if err.Error() != "validation failed: missing required field" {
+		t.Errorf("unexpected error text: %v", err)
+	}
+	// result is a typed-nil *CallToolResult wrapped in mcp.Result interface.
+	if toolResult, ok := result.(*mcp.CallToolResult); ok && toolResult != nil {
+		t.Errorf("expected nil *CallToolResult, got %+v", toolResult)
 	}
 }
 

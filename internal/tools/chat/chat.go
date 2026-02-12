@@ -3,6 +3,7 @@ package chat
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -24,7 +25,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Chat Spaces",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListChatSpacesHandler(factory))
 
@@ -35,7 +36,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Chat Messages",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetChatMessagesHandler(factory))
 
@@ -46,7 +47,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Search Chat Messages",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchChatMessagesHandler(factory))
 
@@ -56,7 +57,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Send a message to a Google Chat space. Can send to a specific thread or create a new one.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Send Chat Message",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSendChatMessageHandler(factory))
 }

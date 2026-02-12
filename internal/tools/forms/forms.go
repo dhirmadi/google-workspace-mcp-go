@@ -3,6 +3,7 @@ package forms
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -22,7 +23,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new Google Form with a title and optional description.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Form",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateFormHandler(factory))
 
@@ -33,7 +34,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Form",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetFormHandler(factory))
 
@@ -46,7 +47,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Form Responses",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListFormResponsesHandler(factory))
 
@@ -59,7 +60,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Set Form Publish Settings",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createSetPublishSettingsHandler(factory))
 
@@ -70,7 +71,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Form Response",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetFormResponseHandler(factory))
 
@@ -80,9 +81,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Perform batch updates on a Google Form: add/update/delete items, update info, or modify settings.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Batch Update Form",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchUpdateFormHandler(factory))
 }
-
-func ptrBool(b bool) *bool { return &b }

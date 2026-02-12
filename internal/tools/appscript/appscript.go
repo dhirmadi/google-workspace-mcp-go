@@ -3,6 +3,7 @@ package appscript
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -23,7 +24,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Script Projects",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListScriptProjectsHandler(factory))
 
@@ -34,7 +35,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Script Project",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetScriptProjectHandler(factory))
 
@@ -45,7 +46,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Script Content",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetScriptContentHandler(factory))
 
@@ -55,7 +56,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new Apps Script project, optionally bound to a Google Doc, Sheet, Slide, or Form.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Script Project",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateScriptProjectHandler(factory))
 
@@ -66,7 +67,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Script Content",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateScriptContentHandler(factory))
 
@@ -76,7 +77,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Execute a function in an Apps Script project. The script must be deployed as an API executable and the user must have edit access. Rate limit: ~30 calls/min.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Run Script Function",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createRunScriptFunctionHandler(factory))
 
@@ -87,7 +88,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Generate Trigger Code",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGenerateTriggerCodeHandler())
 
@@ -99,7 +100,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new deployment for an Apps Script project (web app, API executable, or add-on).",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Deployment",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateDeploymentHandler(factory))
 
@@ -110,7 +111,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Deployments",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListDeploymentsHandler(factory))
 
@@ -121,7 +122,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Deployment",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateDeploymentHandler(factory))
 
@@ -131,8 +132,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Delete a deployment from an Apps Script project.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Deployment",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteDeploymentHandler(factory))
 
@@ -142,8 +143,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Delete an Apps Script project by moving it to Drive trash.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Script Project",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteScriptProjectHandler(factory))
 
@@ -154,7 +155,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Script Versions",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListVersionsHandler(factory))
 
@@ -164,7 +165,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new immutable version of an Apps Script project.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Script Version",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateVersionHandler(factory))
 
@@ -175,7 +176,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Script Version",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetVersionHandler(factory))
 
@@ -186,7 +187,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Script Processes",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListScriptProcessesHandler(factory))
 
@@ -197,9 +198,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Script Metrics",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetScriptMetricsHandler(factory))
 }
-
-func ptrBool(b bool) *bool { return &b }

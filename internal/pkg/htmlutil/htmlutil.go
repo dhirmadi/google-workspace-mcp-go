@@ -2,6 +2,7 @@ package htmlutil
 
 import (
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -72,12 +73,26 @@ func ToPlainText(html string) string {
 }
 
 // decodeEntities replaces HTML entities with their text equivalents.
+// Supports named entities (e.g. &amp;) and numeric entities (&#123; and &#x1F600;).
 func decodeEntities(text string) string {
 	return entityRE.ReplaceAllStringFunc(text, func(entity string) string {
 		if replacement, ok := entityMap[strings.ToLower(entity)]; ok {
 			return replacement
 		}
-		// For numeric entities, return as-is (could decode, but edge case)
+		// Decode numeric entities: &#123; (decimal) or &#x1F600; (hex)
+		if strings.HasPrefix(entity, "&#") {
+			numStr := entity[2 : len(entity)-1] // strip "&#" and ";"
+			var codePoint int64
+			var err error
+			if strings.HasPrefix(numStr, "x") || strings.HasPrefix(numStr, "X") {
+				codePoint, err = strconv.ParseInt(numStr[1:], 16, 32)
+			} else {
+				codePoint, err = strconv.ParseInt(numStr, 10, 32)
+			}
+			if err == nil && codePoint > 0 {
+				return string(rune(codePoint))
+			}
+		}
 		return entity
 	})
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
 	iauth "github.com/evert/google-workspace-mcp-go/internal/auth"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
 )
 
@@ -25,7 +26,7 @@ func Register(server *mcp.Server, oauthMgr *iauth.OAuthManager) {
 		Description: "Start the Google OAuth 2.0 authentication flow. Returns an authorization URL for the user to visit and grant access to their Google Workspace account. After the user completes authentication, their credentials are stored for subsequent API calls.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Authenticate with Google",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createStartAuthHandler(oauthMgr))
 }
@@ -53,5 +54,3 @@ func createStartAuthHandler(oauthMgr *iauth.OAuthManager) mcp.ToolHandlerFor[Sta
 		}, nil, nil
 	}
 }
-
-func ptrBool(b bool) *bool { return &b }

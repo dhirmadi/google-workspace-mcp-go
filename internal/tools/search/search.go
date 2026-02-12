@@ -3,6 +3,7 @@ package search
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -24,7 +25,7 @@ func Register(server *mcp.Server, factory *services.Factory, cseID string) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Custom Web Search",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchCustomHandler(factory, cseID))
 
@@ -37,7 +38,7 @@ func Register(server *mcp.Server, factory *services.Factory, cseID string) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Site-Restricted Search",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchCustomSiterestrictHandler(factory, cseID))
 
@@ -50,9 +51,7 @@ func Register(server *mcp.Server, factory *services.Factory, cseID string) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Search Engine Info",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetSearchEngineInfoHandler(factory, cseID))
 }
-
-func ptrBool(b bool) *bool { return &b }

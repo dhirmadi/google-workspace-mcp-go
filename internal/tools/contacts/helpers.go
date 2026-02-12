@@ -122,5 +122,3 @@ func buildPerson(givenName, familyName, email, phone, orgName, orgTitle string) 
 
 	return person
 }
-
-func ptrBool(b bool) *bool { return &b }
