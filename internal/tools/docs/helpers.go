@@ -230,5 +230,3 @@ func hexToByte(hex string) byte {
 	}
 	return val
 }
-
-func ptrBool(b bool) *bool { return &b }

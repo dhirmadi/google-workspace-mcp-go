@@ -1,11 +1,14 @@
 package auth
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"golang.org/x/oauth2"
 )
@@ -76,28 +79,45 @@ func (s *FileTokenStore) Load(userEmail string) (*oauth2.Token, error) {
 }
 
 func (s *FileTokenStore) tokenPath(userEmail string) string {
-	return filepath.Join(s.dir, userEmail+".json")
+	// Use a SHA-256 hash of the email as the filename to prevent path traversal.
+	hash := sha256.Sum256([]byte(userEmail))
+	return filepath.Join(s.dir, hex.EncodeToString(hash[:])+".json")
 }
 
 // PersistingTokenSource wraps an oauth2.TokenSource to persist refreshed tokens to disk.
+// It tracks the last known access token so it only writes to disk when the token
+// actually changes (i.e. on refresh), not on every Token() call.
 type PersistingTokenSource struct {
 	Base      oauth2.TokenSource
 	Store     TokenStore
 	UserEmail string
+
+	mu              sync.Mutex
+	lastAccessToken string
 }
 
-// Token returns a token, persisting any newly refreshed token to the store.
+// Token returns a token, persisting it only when the access token has changed
+// (i.e. after an actual refresh).
 func (p *PersistingTokenSource) Token() (*oauth2.Token, error) {
 	token, err := p.Base.Token()
 	if err != nil {
 		return nil, err
 	}
-	// Persist on refresh — best effort, don't fail the request
-	if err := p.Store.Save(p.UserEmail, token); err != nil {
-		slog.Warn("failed to persist refreshed token",
-			"email", p.UserEmail,
-			"error", err,
-		)
+
+	p.mu.Lock()
+	changed := token.AccessToken != p.lastAccessToken
+	if changed {
+		p.lastAccessToken = token.AccessToken
+	}
+	p.mu.Unlock()
+
+	if changed {
+		if err := p.Store.Save(p.UserEmail, token); err != nil {
+			slog.Warn("failed to persist refreshed token",
+				"email", p.UserEmail,
+				"error", err,
+			)
+		}
 	}
 	return token, nil
 }

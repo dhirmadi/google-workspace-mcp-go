@@ -3,6 +3,7 @@ package sheets
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 	"github.com/evert/google-workspace-mcp-go/internal/tools/comments"
 )
@@ -21,7 +22,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new Google Spreadsheet with optional sheet tab names.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Spreadsheet",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateSpreadsheetHandler(factory))
 
@@ -32,7 +33,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Read Sheet Values",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createReadSheetValuesHandler(factory))
 
@@ -43,7 +44,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Modify Sheet Values",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createModifySheetValuesHandler(factory))
 
@@ -56,7 +57,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Spreadsheets",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListSpreadsheetsHandler(factory))
 
@@ -67,7 +68,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Spreadsheet Info",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetSpreadsheetInfoHandler(factory))
 
@@ -77,7 +78,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Format cells in a range (bold, italic, colors, alignment, number format, borders).",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Format Sheet Range",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createFormatSheetRangeHandler(factory))
 
@@ -87,7 +88,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Add a conditional formatting rule to a sheet range.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Add Conditional Formatting",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createAddConditionalFormattingHandler(factory))
 
@@ -98,7 +99,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Conditional Formatting",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateConditionalFormattingHandler(factory))
 
@@ -108,8 +109,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Delete a conditional formatting rule by index.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Conditional Formatting",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteConditionalFormattingHandler(factory))
 
@@ -121,12 +122,10 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new sheet tab in an existing Google Spreadsheet.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Sheet Tab",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateSheetHandler(factory))
 
 	// --- Comment tools (via shared Drive API) ---
 	comments.Register(server, factory, "spreadsheet", serviceIcons)
 }
-
-func ptrBool(b bool) *bool { return &b }

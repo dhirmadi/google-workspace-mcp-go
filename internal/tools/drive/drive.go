@@ -3,6 +3,7 @@ package drive
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -21,7 +22,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Search Drive Files",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchFilesHandler(factory))
 
@@ -32,7 +33,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Drive File Content",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetFileContentHandler(factory))
 
@@ -43,7 +44,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Drive File Download URL",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetDownloadURLHandler(factory))
 
@@ -53,7 +54,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new file in Google Drive with optional content. Supports text files and Google Workspace native types.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Drive File",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateFileHandler(factory))
 
@@ -63,7 +64,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Import a file from Google Drive into Google Doc format. Creates a copy as a Google Doc.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Import to Google Doc",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createImportToDocHandler(factory))
 
@@ -74,7 +75,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Share Drive File",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createShareFileHandler(factory))
 
@@ -85,7 +86,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Drive Shareable Link",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetShareableLinkHandler(factory))
 
@@ -98,7 +99,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Drive Items",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListDriveItemsHandler(factory))
 
@@ -108,7 +109,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a copy of a Google Drive file, optionally in a different folder.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Copy Drive File",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCopyFileHandler(factory))
 
@@ -119,7 +120,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Drive File",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateFileHandler(factory))
 
@@ -130,7 +131,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Drive Permission",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdatePermissionHandler(factory))
 
@@ -140,8 +141,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Remove a sharing permission from a Drive file or folder.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Remove Drive Permission",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createRemovePermissionHandler(factory))
 
@@ -151,7 +152,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Transfer ownership of a Drive file to another user.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Transfer Drive Ownership",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createTransferOwnershipHandler(factory))
 
@@ -161,7 +162,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Share multiple Drive files with a user in a single operation. Reports progress during batch processing.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Batch Share Drive Files",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchShareHandler(factory))
 
@@ -174,7 +175,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get File Permissions",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetFilePermissionsHandler(factory))
 
@@ -185,9 +186,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Check Public Access",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCheckPublicAccessHandler(factory))
 }
-
-func ptrBool(b bool) *bool { return &b }

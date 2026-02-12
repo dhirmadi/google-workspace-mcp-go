@@ -54,21 +54,8 @@ func extractDocx(r *zip.Reader) (string, error) {
 	return "", fmt.Errorf("word/document.xml not found in docx")
 }
 
-// extractXlsx extracts text from a .xlsx file by reading shared strings and sheet data.
+// extractXlsx extracts text from a .xlsx file by reading sheet data.
 func extractXlsx(r *zip.Reader) (string, error) {
-	// First, read shared strings
-	sharedStrings := make(map[int]string)
-	for _, f := range r.File {
-		if f.Name == "xl/sharedStrings.xml" {
-			strings, err := parseSharedStrings(f)
-			if err == nil {
-				sharedStrings = strings
-			}
-			break
-		}
-	}
-
-	// Then read sheets
 	var parts []string
 	for _, f := range r.File {
 		if strings.HasPrefix(f.Name, "xl/worksheets/sheet") && strings.HasSuffix(f.Name, ".xml") {
@@ -81,8 +68,6 @@ func extractXlsx(r *zip.Reader) (string, error) {
 			}
 		}
 	}
-
-	_ = sharedStrings // Shared strings are embedded in XML text extraction
 	return strings.Join(parts, "\n\n"), nil
 }
 
@@ -155,50 +140,4 @@ func xmlToText(data []byte) string {
 	}
 
 	return strings.Join(parts, " ")
-}
-
-// parseSharedStrings parses the sharedStrings.xml from an xlsx file.
-func parseSharedStrings(f *zip.File) (map[int]string, error) {
-	rc, err := f.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer rc.Close()
-
-	data, err := io.ReadAll(io.LimitReader(rc, MaxFileSize))
-	if err != nil {
-		return nil, err
-	}
-
-	decoder := xml.NewDecoder(bytes.NewReader(data))
-	result := make(map[int]string)
-	index := 0
-	var inSi bool
-	var current strings.Builder
-
-	for {
-		tok, err := decoder.Token()
-		if err != nil {
-			break
-		}
-		switch t := tok.(type) {
-		case xml.StartElement:
-			if t.Name.Local == "si" {
-				inSi = true
-				current.Reset()
-			}
-		case xml.EndElement:
-			if t.Name.Local == "si" {
-				result[index] = current.String()
-				index++
-				inSi = false
-			}
-		case xml.CharData:
-			if inSi {
-				current.Write(t)
-			}
-		}
-	}
-
-	return result, nil
 }

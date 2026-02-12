@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"html"
 	"log/slog"
 	"net/http"
 )
@@ -19,30 +20,40 @@ type ClientInvalidator interface {
 func OAuthCallbackHandler(oauthMgr *OAuthManager, invalidator ClientInvalidator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		code := r.URL.Query().Get("code")
-		state := r.URL.Query().Get("state") // user email
+		rawState := r.URL.Query().Get("state")
 		errMsg := r.URL.Query().Get("error")
 
 		if errMsg != "" {
-			slog.Error("OAuth callback error", "error", errMsg, "state", state)
+			slog.Error("OAuth callback error", "error", errMsg, "state", rawState)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, renderErrorPage(errMsg))
+			fmt.Fprint(w, renderErrorPage(html.EscapeString(errMsg)))
 			return
 		}
 
 		if code == "" {
-			slog.Error("OAuth callback missing code", "state", state)
+			slog.Error("OAuth callback missing code", "state", rawState)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(w, renderErrorPage("No authorization code received from Google."))
 			return
 		}
 
-		if state == "" {
-			slog.Error("OAuth callback missing state (user email)")
+		if rawState == "" {
+			slog.Error("OAuth callback missing state")
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, renderErrorPage("Missing user email in OAuth state. Please restart the authentication from the MCP client."))
+			fmt.Fprint(w, renderErrorPage("Missing OAuth state parameter. Please restart the authentication from the MCP client."))
+			return
+		}
+
+		// Verify HMAC-signed state and extract user email.
+		state, valid := oauthMgr.VerifyAndExtractEmail(rawState)
+		if !valid {
+			slog.Error("OAuth callback invalid state signature", "state", rawState)
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, renderErrorPage("Invalid OAuth state — possible CSRF attempt. Please restart the authentication from the MCP client."))
 			return
 		}
 
@@ -52,7 +63,7 @@ func OAuthCallbackHandler(oauthMgr *OAuthManager, invalidator ClientInvalidator)
 			slog.Error("OAuth token exchange failed", "email", state, "error", err)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, renderErrorPage(fmt.Sprintf("Token exchange failed: %v", err)))
+			fmt.Fprint(w, renderErrorPage(html.EscapeString(fmt.Sprintf("Token exchange failed: %v", err))))
 			return
 		}
 
@@ -66,7 +77,7 @@ func OAuthCallbackHandler(oauthMgr *OAuthManager, invalidator ClientInvalidator)
 		slog.Info("OAuth authentication successful", "email", state)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, renderSuccessPage(state))
+		fmt.Fprint(w, renderSuccessPage(html.EscapeString(state)))
 	}
 }
 

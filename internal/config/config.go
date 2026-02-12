@@ -98,7 +98,9 @@ func Load() (*Config, error) {
 	flag.BoolVar(&cfg.ReadOnly, "read-only", cfg.ReadOnly, "Request only read-only scopes, disable write tools")
 	flag.Parse()
 
+	// CLI --tools flag overrides (not appends to) the ENABLED_SERVICES env var.
 	if toolsFlag != "" {
+		cfg.EnabledServices = nil
 		for _, s := range strings.Split(toolsFlag, ",") {
 			s = strings.TrimSpace(s)
 			if s != "" {

@@ -3,6 +3,7 @@ package slides
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 	"github.com/evert/google-workspace-mcp-go/internal/tools/comments"
 )
@@ -23,7 +24,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new Google Slides presentation.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Presentation",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreatePresentationHandler(factory))
 
@@ -34,7 +35,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Presentation",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetPresentationHandler(factory))
 
@@ -46,7 +47,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Perform batch updates on a Google Slides presentation: create slides, insert text, images, shapes, tables, and more.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Batch Update Presentation",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchUpdatePresentationHandler(factory))
 
@@ -57,7 +58,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Slide Page",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetPageHandler(factory))
 
@@ -68,12 +69,10 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Slide Thumbnail",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetPageThumbnailHandler(factory))
 
 	// --- Comment tools (via shared Drive API) ---
 	comments.Register(server, factory, "presentation", serviceIcons)
 }
-
-func ptrBool(b bool) *bool { return &b }

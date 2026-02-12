@@ -303,5 +303,3 @@ func truncateText(text string, maxLen int) string {
 	}
 	return text[:maxLen] + "..."
 }
-
-func ptrBool(b bool) *bool { return &b }

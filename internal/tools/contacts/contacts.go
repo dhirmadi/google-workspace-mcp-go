@@ -3,6 +3,7 @@ package contacts
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -24,7 +25,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Search Contacts",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchContactsHandler(factory))
 
@@ -35,7 +36,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Contact",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetContactHandler(factory))
 
@@ -46,7 +47,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Contacts",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListContactsHandler(factory))
 
@@ -56,7 +57,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new contact with name, email, phone, and organization details.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Contact",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateContactHandler(factory))
 
@@ -69,7 +70,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Contact",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateContactHandler(factory))
 
@@ -79,8 +80,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Permanently delete a contact. This action cannot be undone.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Contact",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteContactHandler(factory))
 
@@ -91,7 +92,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Contact Groups",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListContactGroupsHandler(factory))
 
@@ -102,7 +103,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Contact Group",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetContactGroupHandler(factory))
 
@@ -114,7 +115,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create multiple contacts in a single batch operation (max 200).",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Batch Create Contacts",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchCreateContactsHandler(factory))
 
@@ -125,7 +126,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Batch Update Contacts",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createBatchUpdateContactsHandler(factory))
 
@@ -135,8 +136,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Delete multiple contacts in a single batch operation.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Batch Delete Contacts",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createBatchDeleteContactsHandler(factory))
 
@@ -146,7 +147,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new contact group (label).",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Contact Group",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateContactGroupHandler(factory))
 
@@ -157,7 +158,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Contact Group",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateContactGroupHandler(factory))
 
@@ -167,8 +168,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Delete a contact group. Optionally also delete contacts in the group.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Contact Group",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteContactGroupHandler(factory))
 
@@ -179,7 +180,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Modify Group Members",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createModifyGroupMembersHandler(factory))
 }

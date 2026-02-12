@@ -1,6 +1,7 @@
 package htmlutil
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -105,22 +106,9 @@ func TestToPlainTextCollapseBlankLines(t *testing.T) {
 
 func containsAll(s string, subs ...string) bool {
 	for _, sub := range subs {
-		if !contains(s, sub) {
+		if !strings.Contains(s, sub) {
 			return false
 		}
 	}
 	return true
-}
-
-func contains(s, sub string) bool {
-	return len(s) >= len(sub) && searchString(s, sub)
-}
-
-func searchString(s, sub string) bool {
-	for i := 0; i <= len(s)-len(sub); i++ {
-		if s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-	return false
 }

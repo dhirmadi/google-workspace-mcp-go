@@ -6,11 +6,13 @@ package comments
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/drive/v3"
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
@@ -81,7 +83,7 @@ func Register(server *mcp.Server, factory *services.Factory, resourceType string
 		Annotations: &mcp.ToolAnnotations{
 			Title:         fmt.Sprintf("Read %s Comments", capitalize(resourceType)),
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createReadCommentsHandler(factory, resourceType))
 
@@ -91,7 +93,7 @@ func Register(server *mcp.Server, factory *services.Factory, resourceType string
 		Description: fmt.Sprintf("Add a new comment to a Google %s.", capitalize(resourceType)),
 		Annotations: &mcp.ToolAnnotations{
 			Title:         fmt.Sprintf("Create %s Comment", capitalize(resourceType)),
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateCommentHandler(factory, resourceType))
 
@@ -101,7 +103,7 @@ func Register(server *mcp.Server, factory *services.Factory, resourceType string
 		Description: fmt.Sprintf("Reply to an existing comment on a Google %s.", capitalize(resourceType)),
 		Annotations: &mcp.ToolAnnotations{
 			Title:         fmt.Sprintf("Reply to %s Comment", capitalize(resourceType)),
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createReplyToCommentHandler(factory, resourceType))
 
@@ -112,7 +114,7 @@ func Register(server *mcp.Server, factory *services.Factory, resourceType string
 		Annotations: &mcp.ToolAnnotations{
 			Title:          fmt.Sprintf("Resolve %s Comment", capitalize(resourceType)),
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createResolveCommentHandler(factory, resourceType))
 }
@@ -285,7 +287,6 @@ func capitalize(s string) string {
 	if s == "" {
 		return s
 	}
-	return string(s[0]-32) + s[1:]
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func ptrBool(b bool) *bool { return &b }

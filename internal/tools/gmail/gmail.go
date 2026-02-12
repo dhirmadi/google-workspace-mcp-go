@@ -3,6 +3,7 @@ package gmail
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -21,7 +22,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Search Gmail Messages",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchMessagesHandler(factory))
 
@@ -32,7 +33,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Message Content",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetMessageContentHandler(factory))
 
@@ -43,7 +44,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Messages (Batch)",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchGetMessagesHandler(factory))
 
@@ -53,7 +54,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Send an email using the user's Gmail account. Supports new emails and replies with threading.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Send Gmail Message",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSendMessageHandler(factory))
 
@@ -66,7 +67,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Attachment",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetAttachmentHandler(factory))
 
@@ -77,7 +78,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Thread",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetThreadHandler(factory))
 
@@ -88,7 +89,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Modify Message Labels",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createModifyLabelsHandler(factory))
 
@@ -99,7 +100,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Gmail Labels",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListLabelsHandler(factory))
 
@@ -109,7 +110,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create, update, or delete a Gmail label.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Manage Gmail Label",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createManageLabelHandler(factory))
 
@@ -119,7 +120,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a draft email message that can be edited and sent later.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Draft Gmail Message",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createDraftMessageHandler(factory))
 
@@ -130,7 +131,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Gmail Filters",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListFiltersHandler(factory))
 
@@ -140,7 +141,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create an email filter to automatically process matching messages.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Gmail Filter",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateFilterHandler(factory))
 
@@ -150,8 +151,8 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Permanently delete an email filter.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:           "Delete Gmail Filter",
-			DestructiveHint: ptrBool(true),
-			OpenWorldHint:   ptrBool(true),
+			DestructiveHint: ptr.Bool(true),
+			OpenWorldHint:   ptr.Bool(true),
 		},
 	}, createDeleteFilterHandler(factory))
 
@@ -164,7 +165,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Gmail Threads (Batch)",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchGetThreadsHandler(factory))
 
@@ -175,9 +176,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Batch Modify Message Labels",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createBatchModifyLabelsHandler(factory))
 }
-
-func ptrBool(b bool) *bool { return &b }

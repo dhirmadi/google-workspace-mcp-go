@@ -3,6 +3,7 @@ package docs
 import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/ptr"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 	"github.com/evert/google-workspace-mcp-go/internal/tools/comments"
 )
@@ -24,7 +25,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Get Document Content",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createGetDocContentHandler(factory))
 
@@ -34,7 +35,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a new Google Doc with an optional initial text content.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Document",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateDocHandler(factory))
 
@@ -44,7 +45,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Insert or replace text in a Google Doc with optional formatting (bold, italic, color, font). Can also format existing text without changing content.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Modify Document Text",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createModifyDocTextHandler(factory))
 
@@ -57,7 +58,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Export Document to PDF",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createExportDocToPDFHandler(factory))
 
@@ -68,7 +69,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Search Documents",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createSearchDocsHandler(factory))
 
@@ -78,7 +79,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Find and replace all occurrences of text in a Google Doc.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Find and Replace in Document",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createFindAndReplaceDocHandler(factory))
 
@@ -89,7 +90,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "List Documents in Folder",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createListDocsInFolderHandler(factory))
 
@@ -99,7 +100,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Insert paragraphs or list items into a Google Doc at specified positions.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Insert Document Elements",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createInsertDocElementsHandler(factory))
 
@@ -110,7 +111,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Paragraph Style",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateParagraphStyleHandler(factory))
 
@@ -122,7 +123,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Insert an image into a Google Doc from a public URL at a specified position.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Insert Document Image",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createInsertDocImageHandler(factory))
 
@@ -133,7 +134,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Headers/Footers",
 			IdempotentHint: true,
-			OpenWorldHint:  ptrBool(true),
+			OpenWorldHint:  ptr.Bool(true),
 		},
 	}, createUpdateHeadersFootersHandler(factory))
 
@@ -143,7 +144,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Perform batch updates on a Google Doc using a JSON array of update requests.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Batch Update Document",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createBatchUpdateDocHandler(factory))
 
@@ -154,7 +155,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Inspect Document Structure",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createInspectDocStructureHandler(factory))
 
@@ -164,7 +165,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Description: "Create a table in a Google Doc and optionally populate it with data.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Table with Data",
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createCreateTableHandler(factory))
 
@@ -175,7 +176,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Debug Table Structure",
 			ReadOnlyHint:  true,
-			OpenWorldHint: ptrBool(true),
+			OpenWorldHint: ptr.Bool(true),
 		},
 	}, createDebugTableStructureHandler(factory))
 

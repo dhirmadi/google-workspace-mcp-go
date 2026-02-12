@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -137,7 +138,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		go func() {
 			<-ctx.Done()
 			slog.Info("shutting down HTTP server")
-			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*1e9) // 10s
+			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 			defer shutdownCancel()
 			if err := httpServer.Shutdown(shutdownCtx); err != nil {
 				slog.Error("HTTP server shutdown error", "error", err)
