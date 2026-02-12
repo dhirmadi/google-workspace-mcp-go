@@ -31,9 +31,17 @@ func AuthEnhancerMiddleware(oauthMgr *auth.OAuthManager) mcp.Middleware {
 				return result, err
 			}
 
+			// If the inner handler already returned an error (e.g. SDK
+			// validation failure), there is no tool result to enhance.
+			if err != nil {
+				return result, err
+			}
+
 			// Check whether the result is a tool-error CallToolResult.
+			// Guard against typed-nil interface values: the SDK may wrap
+			// a nil *CallToolResult into a non-nil mcp.Result interface.
 			toolResult, ok := result.(*mcp.CallToolResult)
-			if !ok || !toolResult.IsError || len(toolResult.Content) == 0 {
+			if !ok || toolResult == nil || !toolResult.IsError || len(toolResult.Content) == 0 {
 				return result, err
 			}
 

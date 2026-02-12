@@ -1,7 +1,6 @@
 package htmlutil
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -91,7 +90,7 @@ func decodeEntities(text string) string {
 				codePoint, err = strconv.ParseInt(numStr, 10, 32)
 			}
 			if err == nil && codePoint > 0 {
-				return fmt.Sprintf("%c", rune(codePoint))
+				return string(rune(codePoint))
 			}
 		}
 		return entity

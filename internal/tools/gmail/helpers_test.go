@@ -2,6 +2,7 @@ package gmail
 
 import (
 	"encoding/base64"
+	"mime"
 	"strings"
 	"testing"
 
@@ -167,20 +168,35 @@ func TestBuildRawMessageMinimal(t *testing.T) {
 }
 
 func TestBuildRawMessageNonASCIISubject(t *testing.T) {
-	raw := buildRawMessage("bob@example.com", "Héllo Wörld 日本語", "Body text", "", "", "", "", "")
+	subject := "H\u00e9llo W\u00f6rld \u65e5\u672c\u8a9e" // Héllo Wörld 日本語
+	raw := buildRawMessage("bob@example.com", subject, "Body text", "", "", "", "", "")
 	decoded, err := base64.URLEncoding.DecodeString(raw)
 	if err != nil {
 		t.Fatalf("decoding raw message: %v", err)
 	}
 
 	msg := string(decoded)
-	// Subject should be RFC 2047 encoded, not raw UTF-8
-	if strings.Contains(msg, "Subject: H\u00e9llo") {
-		t.Error("non-ASCII subject should be RFC 2047 encoded, not raw UTF-8")
-	}
+
+	// Must be RFC 2047 Q-encoded, not raw UTF-8 in the header
 	if !strings.Contains(msg, "Subject: =?UTF-8?q?") {
-		t.Errorf("expected RFC 2047 Q-encoded subject, got: %s", msg)
+		t.Errorf("expected RFC 2047 Q-encoded subject header, got:\n%s", msg)
 	}
+
+	// Round-trip: decode the Q-encoded subject and verify it matches the original
+	for _, line := range strings.Split(msg, "\r\n") {
+		if strings.HasPrefix(line, "Subject: ") {
+			dec := new(mime.WordDecoder)
+			got, err := dec.DecodeHeader(strings.TrimPrefix(line, "Subject: "))
+			if err != nil {
+				t.Fatalf("decoding RFC 2047 subject: %v", err)
+			}
+			if got != subject {
+				t.Errorf("round-trip subject mismatch:\n  got:  %q\n  want: %q", got, subject)
+			}
+			return
+		}
+	}
+	t.Error("Subject header not found in raw message")
 }
 
 func TestBuildRawMessageASCIISubjectPassthrough(t *testing.T) {

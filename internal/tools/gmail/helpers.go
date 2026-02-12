@@ -197,12 +197,13 @@ func messageToDetail(msg *gmail.Message) MessageDetail {
 	}
 }
 
-// buildRawMessage builds an RFC 2822 message for the Gmail API.
-// Returns base64url-encoded raw message.
+// buildRawMessage constructs an RFC 2822 message and returns it as a
+// base64url-encoded string suitable for the Gmail API's raw field.
 //
-// The Subject header is RFC 2047 encoded to safely handle non-ASCII characters.
-// The body declares Content-Transfer-Encoding: 8bit so UTF-8 content is
-// transported correctly through mail servers.
+// Encoding details:
+//   - Subject is RFC 2047 Q-encoded so non-ASCII characters survive transit.
+//   - Body is declared Content-Transfer-Encoding: 8bit with charset UTF-8,
+//     which tells receiving MTAs to expect raw UTF-8 octets.
 func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references string) string {
 	var msg strings.Builder
 
