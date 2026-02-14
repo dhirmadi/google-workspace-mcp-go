@@ -94,7 +94,7 @@ This starts the server with:
 - **All 12 services enabled** (137 tools total)
 - **Port 8000** — MCP endpoint at `http://localhost:8000/mcp`
 - **OAuth callback** at `http://localhost:8000/oauth/callback`
-- **Credentials persisted** in a Docker volume (`mcp-credentials`) so tokens survive container restarts
+- **In-memory auth** — tokens are stored in memory only (lost on restart). Use `--persistent-auth` to persist tokens to a Docker volume.
 - **Container auto-restarts** if it crashes or Docker Desktop restarts
 
 The image is built automatically on first run. Subsequent runs reuse the cached image.
@@ -105,7 +105,8 @@ The image is built automatically on first run. Subsequent runs reuse the cached 
 |------|---------|-------------|
 | `--services SVCS` | all 12 services | Comma-separated list of services to enable |
 | `--port PORT` | `8000` | HTTP port to expose (OAuth callback adjusts automatically) |
-| `--email EMAIL` | — | Your Google email (enables single-user mode) |
+| `--persistent-auth` | off | Persist OAuth tokens to a Docker volume (survives restarts) |
+| `--email EMAIL` | — | Your Google email for authentication |
 | `--cse-id ID` | — | Google Custom Search Engine ID |
 | `--log-level LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
 | `--rebuild` | — | Force rebuild the Docker image |
@@ -151,6 +152,14 @@ The image is built automatically on first run. Subsequent runs reuse the cached 
 # → OAuth callback automatically adjusts to http://localhost:9000/oauth/callback
 # → Remember to add http://localhost:9000/oauth/callback to your
 #   Google Cloud Console redirect URIs
+```
+
+**Persistent authentication** — tokens survive container restarts:
+
+```bash
+./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --persistent-auth
+# → Tokens stored in Docker volume 'mcp-credentials'
+# → Users don't need to re-authenticate after restarts
 ```
 
 **Debug logging** — see every request and response in the container logs:
@@ -248,10 +257,10 @@ Every tool has MCP annotations that tell AI agents what the tool does:
 | `MCP_PORT` | No | `8000` | HTTP server port |
 | `WORKSPACE_MCP_HOST` | No | `0.0.0.0` | HTTP bind address |
 | `WORKSPACE_MCP_BASE_URI` | No | `http://localhost` | Base URI for OAuth callbacks |
-| `WORKSPACE_MCP_CREDENTIALS_DIR` | No | `~/.google_workspace_mcp/credentials` | Token storage directory |
-| `USER_GOOGLE_EMAIL` | No | — | Default email for single-user mode |
-| `MCP_SINGLE_USER_MODE` | No | `false` | Single-user mode (skip session mapping) |
+| `WORKSPACE_MCP_PERSISTENT_AUTH` | No | `false` | Persist OAuth tokens to disk (survives restarts) |
+| `WORKSPACE_MCP_CREDENTIALS_DIR` | No | `~/.google_workspace_mcp/credentials` | Token storage directory (only used with persistent auth) |
 | `WORKSPACE_MCP_READ_ONLY` | No | `false` | Read-only mode (only read scopes) |
+| `TOOL_TIER` | No | `complete` | Tool tier: `core`, `extended`, or `complete` |
 | `GOOGLE_CSE_ID` | No | — | Custom Search Engine ID |
 | `LOG_LEVEL` | No | `info` | `debug`, `info`, `warn`, `error` |
 
@@ -263,7 +272,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-See `docker-compose.yml` for the full configuration.
+To enable persistent auth in Docker Compose, add `WORKSPACE_MCP_PERSISTENT_AUTH=true` and mount a volume for `/data/credentials`. See `docker-compose.yml` for the full configuration.
 
 ---
 
@@ -280,7 +289,7 @@ See `docker-compose.yml` for the full configuration.
 
 The OAuth callback URL is built from the port you pass to `start.sh`. If you use `--port 9000`, the callback goes to `http://localhost:9000/oauth/callback`. Make sure the redirect URI in your [Google Cloud Console](https://console.cloud.google.com/apis/credentials) matches the port you're using.
 
-Tokens are stored per-user at `/data/credentials/` (in Docker) or `~/.google_workspace_mcp/credentials/` (local). Token files have `0600` permissions. The credentials directory has `0700` permissions. Tokens persist across container restarts via a Docker named volume.
+By default, tokens are stored **in memory only** and lost on restart. With `--persistent-auth`, tokens are stored per-user at `/data/credentials/` (in Docker) or `~/.google_workspace_mcp/credentials/` (local). Token files have `0600` permissions. The credentials directory has `0700` permissions. In Docker, a named volume (`mcp-credentials`) is mounted automatically to persist tokens across restarts.
 
 ---
 
