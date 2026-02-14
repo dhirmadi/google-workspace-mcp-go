@@ -170,9 +170,7 @@ func createGetThreadHandler(factory *services.Factory) mcp.ToolHandlerFor[GetThr
 			rb.Blank()
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetThreadOutput{ThreadID: thread.Id, Messages: messages}, nil
+		return rb.TextResult(), GetThreadOutput{ThreadID: thread.Id, Messages: messages}, nil
 	}
 }
 
@@ -214,9 +212,7 @@ func createModifyLabelsHandler(factory *services.Factory) mcp.ToolHandlerFor[Mod
 			rb.KeyValue("Removed", input.RemoveLabels)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -264,9 +260,7 @@ func createListLabelsHandler(factory *services.Factory) mcp.ToolHandlerFor[ListL
 			rb.Line("    ID: %s", l.Id)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListLabelsOutput{Labels: labels}, nil
+		return rb.TextResult(), ListLabelsOutput{Labels: labels}, nil
 	}
 }
 
@@ -337,9 +331,7 @@ func createManageLabelHandler(factory *services.Factory) mcp.ToolHandlerFor[Mana
 			return nil, nil, fmt.Errorf("invalid action %q — use create, update, or delete", input.Action)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -385,9 +377,7 @@ func createDraftMessageHandler(factory *services.Factory) mcp.ToolHandlerFor[Dra
 			rb.KeyValue("Message ID", draft.Message.Id)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -463,9 +453,7 @@ func createListFiltersHandler(factory *services.Factory) mcp.ToolHandlerFor[List
 			rb.Line("    Criteria: %s", string(criteriaJSON))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListFiltersOutput{Filters: filters}, nil
+		return rb.TextResult(), ListFiltersOutput{Filters: filters}, nil
 	}
 }
 
@@ -518,9 +506,7 @@ func createCreateFilterHandler(factory *services.Factory) mcp.ToolHandlerFor[Cre
 			rb.KeyValue("Query", input.Query)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -547,8 +533,6 @@ func createDeleteFilterHandler(factory *services.Factory) mcp.ToolHandlerFor[Del
 		rb.Header("Filter Deleted")
 		rb.KeyValue("Filter ID", input.FilterID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

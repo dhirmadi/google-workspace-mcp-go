@@ -45,9 +45,7 @@ func createListTaskListsHandler(factory *services.Factory) mcp.ToolHandlerFor[Li
 			rb.Line("    ID: %s", tl.Id)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListTaskListsOutput{TaskLists: lists}, nil
+		return rb.TextResult(), ListTaskListsOutput{TaskLists: lists}, nil
 	}
 }
 
@@ -134,9 +132,7 @@ func createListTasksHandler(factory *services.Factory) mcp.ToolHandlerFor[ListTa
 			rb.Line("    ID: %s", ts.ID)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListTasksOutput{Tasks: taskList, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListTasksOutput{Tasks: taskList, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -185,9 +181,7 @@ func createGetTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[GetTaskI
 		}
 		rb.KeyValue("Updated", ts.Updated)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetTaskOutput{Task: ts}, nil
+		return rb.TextResult(), GetTaskOutput{Task: ts}, nil
 	}
 }
 
@@ -239,9 +233,7 @@ func createCreateTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[Creat
 			rb.KeyValue("Due", created.Due)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -297,9 +289,7 @@ func createUpdateTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[Updat
 			rb.KeyValue("Due", updated.Due)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -328,8 +318,6 @@ func createDeleteTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[Delet
 		rb.KeyValue("Task ID", input.TaskID)
 		rb.KeyValue("Task List", input.TaskListID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

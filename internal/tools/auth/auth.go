@@ -49,8 +49,6 @@ func createStartAuthHandler(oauthMgr *iauth.OAuthManager) mcp.ToolHandlerFor[Sta
 		rb.Line("After granting access, the OAuth callback will automatically capture the authorization code.")
 		rb.Line("Authenticating as: %s", input.UserEmail)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

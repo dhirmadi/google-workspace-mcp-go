@@ -43,9 +43,7 @@ func createCreatePresentationHandler(factory *services.Factory) mcp.ToolHandlerF
 		rb.KeyValue("Slides", len(created.Slides))
 		rb.KeyValue("URL", fmt.Sprintf("https://docs.google.com/presentation/d/%s/edit", created.PresentationId))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -123,9 +121,7 @@ func createGetPresentationHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			PageHeight:     ph,
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -163,9 +159,7 @@ func createBatchUpdatePresentationHandler(factory *services.Factory) mcp.ToolHan
 		rb.KeyValue("Presentation ID", result.PresentationId)
 		rb.KeyValue("Replies", len(result.Replies))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -229,9 +223,7 @@ func createGetPageHandler(factory *services.Factory) mcp.ToolHandlerFor[GetPageI
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, PageOutput{ObjectID: page.ObjectId, ElementCount: len(page.PageElements), Elements: elements}, nil
+		return rb.TextResult(), PageOutput{ObjectID: page.ObjectId, ElementCount: len(page.PageElements), Elements: elements}, nil
 	}
 }
 
@@ -276,9 +268,7 @@ func createGetPageThumbnailHandler(factory *services.Factory) mcp.ToolHandlerFor
 		rb.KeyValue("Size", fmt.Sprintf("%dx%d", thumbnail.Width, thumbnail.Height))
 		rb.KeyValue("URL", thumbnail.ContentUrl)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 

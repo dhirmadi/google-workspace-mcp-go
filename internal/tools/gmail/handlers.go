@@ -87,9 +87,7 @@ func createSearchMessagesHandler(factory *services.Factory) mcp.ToolHandlerFor[S
 			ResultCount:   len(summaries),
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -156,9 +154,7 @@ func createGetMessageContentHandler(factory *services.Factory) mcp.ToolHandlerFo
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetMessageContentOutput{Message: detail}, nil
+		return rb.TextResult(), GetMessageContentOutput{Message: detail}, nil
 	}
 }
 
@@ -246,9 +242,7 @@ func createBatchGetMessagesHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Blank()
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, BatchGetMessagesOutput{Messages: messages}, nil
+		return rb.TextResult(), BatchGetMessagesOutput{Messages: messages}, nil
 	}
 }
 
@@ -300,8 +294,6 @@ func createSendMessageHandler(factory *services.Factory) mcp.ToolHandlerFor[Send
 			rb.KeyValue("CC", input.CC)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

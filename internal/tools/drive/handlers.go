@@ -94,9 +94,7 @@ func createSearchFilesHandler(factory *services.Factory) mcp.ToolHandlerFor[Sear
 			ResultCount:   len(files),
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -185,9 +183,7 @@ func createGetFileContentHandler(factory *services.Factory) mcp.ToolHandlerFor[G
 		rb.Blank()
 		rb.Raw(content)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetFileContentOutput{Content: content, Title: file.Name, MimeType: file.MimeType}, nil
+		return rb.TextResult(), GetFileContentOutput{Content: content, Title: file.Name, MimeType: file.MimeType}, nil
 	}
 }
 
@@ -244,9 +240,7 @@ func createGetDownloadURLHandler(factory *services.Factory) mcp.ToolHandlerFor[G
 		rb.KeyValue("Type", formatFileType(file.MimeType))
 		rb.KeyValue("Download URL", downloadURL)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetDownloadURLOutput{DownloadURL: downloadURL, FileName: file.Name, MimeType: file.MimeType}, nil
+		return rb.TextResult(), GetDownloadURLOutput{DownloadURL: downloadURL, FileName: file.Name, MimeType: file.MimeType}, nil
 	}
 }
 
@@ -307,9 +301,7 @@ func createCreateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[Creat
 			rb.KeyValue("Link", created.WebViewLink)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -374,9 +366,7 @@ func createImportToDocHandler(factory *services.Factory) mcp.ToolHandlerFor[Impo
 			rb.KeyValue("Link", created.WebViewLink)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -439,9 +429,7 @@ func createShareFileHandler(factory *services.Factory) mcp.ToolHandlerFor[ShareF
 		rb.KeyValue("Permission", formatPermission(created))
 		rb.KeyValue("Permission ID", created.Id)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -488,9 +476,7 @@ func createGetShareableLinkHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Item("%s", formatPermission(p))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetShareableLinkOutput{WebViewLink: file.WebViewLink, Permissions: perms}, nil
+		return rb.TextResult(), GetShareableLinkOutput{WebViewLink: file.WebViewLink, Permissions: perms}, nil
 	}
 }
 

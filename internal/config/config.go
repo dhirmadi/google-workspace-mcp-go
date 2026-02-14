@@ -26,13 +26,11 @@ type Config struct {
 	ToolTier        string
 	EnabledServices []string
 	ReadOnly        bool
-	SingleUser      bool
 	EnableOAuth21   bool
-	StatelessMode   bool
+	PersistentAuth  bool
 	LogLevel        string
 	CredentialsDir  string
 	CSEID           string
-	DefaultEmail    string
 }
 
 // Load reads configuration from environment variables and CLI flags.
@@ -44,7 +42,6 @@ func Load() (*Config, error) {
 	cfg.OAuth.ClientID = os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	cfg.OAuth.ClientSecret = os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 	cfg.CSEID = os.Getenv("GOOGLE_CSE_ID")
-	cfg.DefaultEmail = os.Getenv("USER_GOOGLE_EMAIL")
 
 	cfg.CredentialsDir = os.Getenv("WORKSPACE_MCP_CREDENTIALS_DIR")
 	if cfg.CredentialsDir == "" {
@@ -70,9 +67,8 @@ func Load() (*Config, error) {
 	cfg.Server.Transport = envOrDefault("MCP_TRANSPORT", "stdio")
 	cfg.LogLevel = envOrDefault("LOG_LEVEL", "info")
 	cfg.ToolTier = envOrDefault("TOOL_TIER", "complete")
-	cfg.SingleUser = envBool("MCP_SINGLE_USER_MODE")
 	cfg.EnableOAuth21 = envBool("MCP_ENABLE_OAUTH21")
-	cfg.StatelessMode = envBool("WORKSPACE_MCP_STATELESS_MODE")
+	cfg.PersistentAuth = envBool("WORKSPACE_MCP_PERSISTENT_AUTH")
 	cfg.ReadOnly = envBool("WORKSPACE_MCP_READ_ONLY")
 
 	// Port
@@ -94,8 +90,8 @@ func Load() (*Config, error) {
 	var toolsFlag string
 	flag.StringVar(&toolsFlag, "tools", "", "Services to enable (comma-separated): gmail,drive,calendar,docs,sheets,chat,forms,slides,tasks,contacts,search,appscript")
 	flag.StringVar(&cfg.ToolTier, "tool-tier", cfg.ToolTier, "Load tools by tier: core, extended, or complete")
-	flag.BoolVar(&cfg.SingleUser, "single-user", cfg.SingleUser, "Bypass session mapping, use any credentials")
 	flag.BoolVar(&cfg.ReadOnly, "read-only", cfg.ReadOnly, "Request only read-only scopes, disable write tools")
+	flag.BoolVar(&cfg.PersistentAuth, "persistent-auth", cfg.PersistentAuth, "Persist OAuth tokens to disk (survives restarts)")
 	flag.Parse()
 
 	// CLI --tools flag overrides (not appends to) the ENABLED_SERVICES env var.
@@ -107,6 +103,11 @@ func Load() (*Config, error) {
 				cfg.EnabledServices = append(cfg.EnabledServices, s)
 			}
 		}
+	}
+
+	// Validate tool tier
+	if TierLevel(cfg.ToolTier) == 0 {
+		return nil, fmt.Errorf("invalid TOOL_TIER %q — must be one of: core, extended, complete", cfg.ToolTier)
 	}
 
 	// Validate required fields

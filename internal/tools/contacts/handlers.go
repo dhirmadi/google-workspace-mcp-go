@@ -60,9 +60,7 @@ func createSearchContactsHandler(factory *services.Factory) mcp.ToolHandlerFor[S
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, SearchContactsOutput{Contacts: contacts}, nil
+		return rb.TextResult(), SearchContactsOutput{Contacts: contacts}, nil
 	}
 }
 
@@ -108,9 +106,7 @@ func createGetContactHandler(factory *services.Factory) mcp.ToolHandlerFor[GetCo
 			rb.KeyValue("Organization", cs.Organization)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetContactOutput{Contact: cs}, nil
+		return rb.TextResult(), GetContactOutput{Contact: cs}, nil
 	}
 }
 
@@ -172,9 +168,7 @@ func createListContactsHandler(factory *services.Factory) mcp.ToolHandlerFor[Lis
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListContactsOutput{Contacts: contacts, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListContactsOutput{Contacts: contacts, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -213,9 +207,7 @@ func createCreateContactHandler(factory *services.Factory) mcp.ToolHandlerFor[Cr
 			rb.KeyValue("Email", cs.Emails[0])
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -267,9 +259,7 @@ func createUpdateContactHandler(factory *services.Factory) mcp.ToolHandlerFor[Up
 		rb.KeyValue("Name", cs.DisplayName)
 		rb.KeyValue("Resource", cs.ResourceName)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -296,9 +286,7 @@ func createDeleteContactHandler(factory *services.Factory) mcp.ToolHandlerFor[De
 		rb.Header("Contact Deleted")
 		rb.KeyValue("Resource", input.ResourceName)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -355,9 +343,7 @@ func createListContactGroupsHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.Line("    Resource: %s | Members: %d", gs.ResourceName, gs.MemberCount)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListContactGroupsOutput{Groups: groups, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListContactGroupsOutput{Groups: groups, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -393,8 +379,6 @@ func createGetContactGroupHandler(factory *services.Factory) mcp.ToolHandlerFor[
 		rb.KeyValue("Members", gs.MemberCount)
 		rb.KeyValue("Type", gs.GroupType)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetContactGroupOutput{Group: gs}, nil
+		return rb.TextResult(), GetContactGroupOutput{Group: gs}, nil
 	}
 }

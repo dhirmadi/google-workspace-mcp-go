@@ -84,6 +84,40 @@ func (s *FileTokenStore) tokenPath(userEmail string) string {
 	return filepath.Join(s.dir, hex.EncodeToString(hash[:])+".json")
 }
 
+// InMemoryTokenStore holds OAuth tokens in memory only.
+// Tokens are lost when the process exits. This is the default mode —
+// no credentials are written to disk.
+type InMemoryTokenStore struct {
+	mu     sync.RWMutex
+	tokens map[string]*oauth2.Token
+}
+
+// NewInMemoryTokenStore creates a token store that keeps tokens in memory only.
+func NewInMemoryTokenStore() *InMemoryTokenStore {
+	return &InMemoryTokenStore{
+		tokens: make(map[string]*oauth2.Token),
+	}
+}
+
+// Save stores a token in memory for the given user email.
+func (s *InMemoryTokenStore) Save(userEmail string, token *oauth2.Token) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.tokens[userEmail] = token
+	return nil
+}
+
+// Load retrieves a token from memory for the given user email.
+func (s *InMemoryTokenStore) Load(userEmail string) (*oauth2.Token, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	token, ok := s.tokens[userEmail]
+	if !ok {
+		return nil, fmt.Errorf("no credentials found for %s — call start_google_auth to authenticate", userEmail)
+	}
+	return token, nil
+}
+
 // PersistingTokenSource wraps an oauth2.TokenSource to persist refreshed tokens to disk.
 // It tracks the last known access token so it only writes to disk when the token
 // actually changes (i.e. on refresh), not on every Token() call.

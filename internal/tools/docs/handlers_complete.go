@@ -69,9 +69,7 @@ func createInsertDocImageHandler(factory *services.Factory) mcp.ToolHandlerFor[I
 		rb.KeyValue("Image URI", input.ImageURI)
 		rb.KeyValue("Position", input.Index)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -187,9 +185,7 @@ func createUpdateHeadersFootersHandler(factory *services.Factory) mcp.ToolHandle
 		rb.KeyValue("Document ID", input.DocumentID)
 		rb.KeyValue("Changes Applied", len(requests))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -227,9 +223,7 @@ func createBatchUpdateDocHandler(factory *services.Factory) mcp.ToolHandlerFor[B
 		rb.KeyValue("Document ID", result.DocumentId)
 		rb.KeyValue("Replies", len(result.Replies))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -270,9 +264,7 @@ func createInspectDocStructureHandler(factory *services.Factory) mcp.ToolHandler
 			rb.Item("[%s] %d–%d: %s", e.Type, e.StartIndex, e.EndIndex, content)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, DocStructureOutput{DocumentID: doc.DocumentId, Title: doc.Title, Elements: elements}, nil
+		return rb.TextResult(), DocStructureOutput{DocumentID: doc.DocumentId, Title: doc.Title, Elements: elements}, nil
 	}
 }
 
@@ -377,9 +369,7 @@ func createCreateTableHandler(factory *services.Factory) mcp.ToolHandlerFor[Crea
 			rb.KeyValue("Data Rows", len(input.Data))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -485,8 +475,6 @@ func createDebugTableStructureHandler(factory *services.Factory) mcp.ToolHandler
 			output.Cells = append(output.Cells, rowCells)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }

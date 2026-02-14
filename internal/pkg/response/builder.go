@@ -3,6 +3,8 @@ package response
 import (
 	"fmt"
 	"strings"
+
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // Builder constructs formatted text responses for MCP tool results.
@@ -77,4 +79,12 @@ func (b *Builder) Raw(text string) *Builder {
 // Build returns the assembled string.
 func (b *Builder) Build() string {
 	return b.sb.String()
+}
+
+// TextResult constructs an MCP CallToolResult from the builder's text content.
+// This is the standard return pattern for all tool handlers.
+func (b *Builder) TextResult() *mcp.CallToolResult {
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: b.sb.String()}},
+	}
 }

@@ -86,9 +86,7 @@ func createListScriptProjectsHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.Line("    ID: %s | Modified: %s", f.Id, f.ModifiedTime)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListScriptProjectsOutput{Projects: projects, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListScriptProjectsOutput{Projects: projects, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -144,9 +142,7 @@ func createGetScriptProjectHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.KeyValue("Creator", project.Creator.Email)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -203,9 +199,7 @@ func createGetScriptContentHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Line("    Lines: ~%d", countLines(f.Source))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetScriptContentOutput{ScriptID: content.ScriptId, Files: files}, nil
+		return rb.TextResult(), GetScriptContentOutput{ScriptID: content.ScriptId, Files: files}, nil
 	}
 }
 
@@ -242,9 +236,7 @@ func createCreateScriptProjectHandler(factory *services.Factory) mcp.ToolHandler
 			rb.KeyValue("Parent ID", created.ParentId)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -286,9 +278,7 @@ func createUpdateScriptContentHandler(factory *services.Factory) mcp.ToolHandler
 			rb.Item("[%s] %s", f.Type, f.Name)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -359,9 +349,7 @@ func createRunScriptFunctionHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.KeyValue("Result", "void (no return value)")
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -401,9 +389,7 @@ func createCreateDeploymentHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.KeyValue("Version", created.DeploymentConfig.VersionNumber)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -471,9 +457,7 @@ func createListDeploymentsHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.Line("    Version: %d", ds.Version)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListDeploymentsOutput{Deployments: deployments, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListDeploymentsOutput{Deployments: deployments, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -516,9 +500,7 @@ func createUpdateDeploymentHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.KeyValue("Description", updated.DeploymentConfig.Description)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -547,9 +529,7 @@ func createDeleteDeploymentHandler(factory *services.Factory) mcp.ToolHandlerFor
 		rb.KeyValue("Deployment ID", input.DeploymentID)
 		rb.KeyValue("Script ID", input.ScriptID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -580,9 +560,7 @@ func createDeleteScriptProjectHandler(factory *services.Factory) mcp.ToolHandler
 		rb.KeyValue("Script ID", input.ScriptID)
 		rb.Line("The project has been moved to Drive trash.")
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -647,9 +625,7 @@ func createListVersionsHandler(factory *services.Factory) mcp.ToolHandlerFor[Lis
 			rb.Line("    Created: %s", v.CreateTime)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListVersionsOutput{Versions: versions, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListVersionsOutput{Versions: versions, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -686,9 +662,7 @@ func createCreateVersionHandler(factory *services.Factory) mcp.ToolHandlerFor[Cr
 		}
 		rb.KeyValue("Created", created.CreateTime)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -732,9 +706,7 @@ func createGetVersionHandler(factory *services.Factory) mcp.ToolHandlerFor[GetVe
 		rb.KeyValue("Description", version.Description)
 		rb.KeyValue("Created", version.CreateTime)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -807,9 +779,7 @@ func createListScriptProcessesHandler(factory *services.Factory) mcp.ToolHandler
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListScriptProcessesOutput{Processes: processes, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListScriptProcessesOutput{Processes: processes, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -873,8 +843,6 @@ func createGetScriptMetricsHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Item("Failed Executions: %d data points", len(metrics.FailedExecutions))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetScriptMetricsOutput{ScriptID: input.ScriptID, MetricSets: metricSets}, nil
+		return rb.TextResult(), GetScriptMetricsOutput{ScriptID: input.ScriptID, MetricSets: metricSets}, nil
 	}
 }

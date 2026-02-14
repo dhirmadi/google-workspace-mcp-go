@@ -88,9 +88,7 @@ func createListChatSpacesHandler(factory *services.Factory) mcp.ToolHandlerFor[L
 			rb.Line("    Name: %s", ss.Name)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListChatSpacesOutput{Spaces: spaces, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListChatSpacesOutput{Spaces: spaces, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -169,9 +167,7 @@ func createGetChatMessagesHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.Line("    Time: %s | Name: %s", ms.CreateTime, ms.Name)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetChatMessagesOutput{Messages: messages, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), GetChatMessagesOutput{Messages: messages, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -243,9 +239,7 @@ func createSearchChatMessagesHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.Line("    Time: %s", ms.CreateTime)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, SearchChatMessagesOutput{Messages: messages, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), SearchChatMessagesOutput{Messages: messages, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -288,9 +282,7 @@ func createSendChatMessageHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.KeyValue("Thread", sent.Thread.Name)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 

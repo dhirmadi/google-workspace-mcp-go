@@ -65,9 +65,7 @@ func createCreateSpreadsheetHandler(factory *services.Factory) mcp.ToolHandlerFo
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -116,9 +114,7 @@ func createReadSheetValuesHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.Line("Row %d: %s", i+1, strings.Join(cells, " | "))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ReadSheetValuesOutput{Values: result.Values, Range: result.Range}, nil
+		return rb.TextResult(), ReadSheetValuesOutput{Values: result.Values, Range: result.Range}, nil
 	}
 }
 
@@ -191,8 +187,6 @@ func createModifySheetValuesHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.KeyValue("Updated cells", result.UpdatedCells)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

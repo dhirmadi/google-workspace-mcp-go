@@ -10,6 +10,7 @@ import (
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/validate"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -41,9 +42,7 @@ func createGetDocContentHandler(factory *services.Factory) mcp.ToolHandlerFor[Ge
 		rb.Blank()
 		rb.Raw(content)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, DocContentOutput{DocumentID: doc.DocumentId, Title: doc.Title, Content: content}, nil
+		return rb.TextResult(), DocContentOutput{DocumentID: doc.DocumentId, Title: doc.Title, Content: content}, nil
 	}
 }
 
@@ -97,9 +96,7 @@ func createCreateDocHandler(factory *services.Factory) mcp.ToolHandlerFor[Create
 		rb.KeyValue("Document ID", created.DocumentId)
 		rb.KeyValue("Link", fmt.Sprintf("https://docs.google.com/document/d/%s/edit", created.DocumentId))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -207,9 +204,7 @@ func createModifyDocTextHandler(factory *services.Factory) mcp.ToolHandlerFor[Mo
 			rb.Item("%s", op)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -235,9 +230,7 @@ func createExportDocToPDFHandler(factory *services.Factory) mcp.ToolHandlerFor[E
 		rb.KeyValue("Format", "PDF")
 		rb.KeyValue("Download URL", url)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ExportDocToPDFOutput{DownloadURL: url, DocumentID: input.DocumentID}, nil
+		return rb.TextResult(), ExportDocToPDFOutput{DownloadURL: url, DocumentID: input.DocumentID}, nil
 	}
 }
 
@@ -307,9 +300,7 @@ func createSearchDocsHandler(factory *services.Factory) mcp.ToolHandlerFor[Searc
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, SearchDocsOutput{Files: files}, nil
+		return rb.TextResult(), SearchDocsOutput{Files: files}, nil
 	}
 }
 
@@ -359,9 +350,7 @@ func createFindAndReplaceDocHandler(factory *services.Factory) mcp.ToolHandlerFo
 		rb.KeyValue("Replace", input.ReplaceText)
 		rb.KeyValue("Replacements", replacements)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -386,6 +375,10 @@ func createListDocsInFolderHandler(factory *services.Factory) mcp.ToolHandlerFor
 		srv, err := factory.Drive(ctx, input.UserEmail)
 		if err != nil {
 			return nil, ListDocsInFolderOutput{}, middleware.HandleGoogleAPIError(err)
+		}
+
+		if err := validate.DriveID(input.FolderID); err != nil {
+			return nil, ListDocsInFolderOutput{}, err
 		}
 
 		q := fmt.Sprintf("'%s' in parents and mimeType='application/vnd.google-apps.document' and trashed=false", input.FolderID)
@@ -420,9 +413,7 @@ func createListDocsInFolderHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Line("    ID: %s | Modified: %s", f.Id, f.ModifiedTime)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListDocsInFolderOutput{Documents: docs}, nil
+		return rb.TextResult(), ListDocsInFolderOutput{Documents: docs}, nil
 	}
 }
 
@@ -478,9 +469,7 @@ func createInsertDocElementsHandler(factory *services.Factory) mcp.ToolHandlerFo
 		rb.KeyValue("Document ID", input.DocumentID)
 		rb.KeyValue("Elements inserted", len(input.Elements))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -557,8 +546,6 @@ func createUpdateParagraphStyleHandler(factory *services.Factory) mcp.ToolHandle
 		rb.KeyValue("Range", fmt.Sprintf("%d-%d", input.StartIndex, input.EndIndex))
 		rb.KeyValue("Fields", strings.Join(fields, ", "))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

@@ -142,6 +142,11 @@ func tierFilterMiddleware(cfg *config.Config, tierMap map[string]config.ToolInfo
 		}
 	}
 
+	// readOnlyAllowed tracks which tools are safe to call in read-only mode.
+	// Built lazily on first tools/list response (when annotations are available).
+	readOnlyAllowed := make(map[string]bool)
+	readOnlyBuilt := false
+
 	return func(next mcp.MethodHandler) mcp.MethodHandler {
 		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
 			if method != "tools/call" {
@@ -150,6 +155,15 @@ func tierFilterMiddleware(cfg *config.Config, tierMap map[string]config.ToolInfo
 				// Filter tools/list responses to hide excluded tools.
 				if method == "tools/list" && err == nil {
 					if listResult, ok := result.(*mcp.ListToolsResult); ok {
+						// Build the read-only allowed set from actual tool annotations.
+						if !readOnlyBuilt {
+							for _, tool := range listResult.Tools {
+								if tool.Annotations != nil && tool.Annotations.ReadOnlyHint {
+									readOnlyAllowed[tool.Name] = true
+								}
+							}
+							readOnlyBuilt = true
+						}
 						listResult.Tools = filterToolPtrList(listResult.Tools, excluded, cfg)
 					}
 				}
@@ -175,11 +189,15 @@ func tierFilterMiddleware(cfg *config.Config, tierMap map[string]config.ToolInfo
 				}, nil
 			}
 
-			// Read-only enforcement: write tools are hidden from tools/list via
-			// filterToolPtrList, so well-behaved clients won't call them.
-			// Tool-level annotations (ReadOnlyHint) are not accessible here
-			// at call time without maintaining a parallel registry, so
-			// enforcement is at the listing layer.
+			// Enforce read-only mode at call time: reject write tools.
+			if cfg.ReadOnly && readOnlyBuilt && !readOnlyAllowed[toolName] {
+				return &mcp.CallToolResult{
+					IsError: true,
+					Content: []mcp.Content{&mcp.TextContent{
+						Text: fmt.Sprintf("tool %q is a write operation and cannot be called in read-only mode", toolName),
+					}},
+				}, nil
+			}
 
 			return next(ctx, method, req)
 		}

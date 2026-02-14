@@ -22,6 +22,7 @@ import (
 	"google.golang.org/api/tasks/v1"
 
 	"github.com/evert/google-workspace-mcp-go/internal/auth"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/validate"
 )
 
 // Factory manages authenticated Google API service clients per user email.
@@ -47,6 +48,10 @@ func NewFactory(oauthMgr *auth.OAuthManager) *Factory {
 // so they outlive any single request context. Individual API calls pass their
 // own request context via .Context(ctx) on each Google API call.
 func (f *Factory) clientFor(ctx context.Context, userEmail string) (*http.Client, error) {
+	if err := validate.Email(userEmail); err != nil {
+		return nil, fmt.Errorf("invalid user email: %w", err)
+	}
+
 	// Fast path: check cache
 	f.mu.RLock()
 	client, ok := f.clients[userEmail]

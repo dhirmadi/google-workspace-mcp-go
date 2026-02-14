@@ -55,9 +55,7 @@ func createListCalendarsHandler(factory *services.Factory) mcp.ToolHandlerFor[Li
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListCalendarsOutput{Calendars: calendars}, nil
+		return rb.TextResult(), ListCalendarsOutput{Calendars: calendars}, nil
 	}
 }
 
@@ -102,9 +100,7 @@ func createGetEventsHandler(factory *services.Factory) mcp.ToolHandlerFor[GetEve
 			rb.Header("Calendar Event")
 			formatEventDetail(rb, es)
 
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-			}, GetEventsOutput{Events: []EventSummary{es}}, nil
+			return rb.TextResult(), GetEventsOutput{Events: []EventSummary{es}}, nil
 		}
 
 		// List events
@@ -157,9 +153,7 @@ func createGetEventsHandler(factory *services.Factory) mcp.ToolHandlerFor[GetEve
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetEventsOutput{Events: events}, nil
+		return rb.TextResult(), GetEventsOutput{Events: events}, nil
 	}
 }
 
@@ -250,9 +244,7 @@ func createCreateEventHandler(factory *services.Factory) mcp.ToolHandlerFor[Crea
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -324,9 +316,7 @@ func createModifyEventHandler(factory *services.Factory) mcp.ToolHandlerFor[Modi
 			rb.KeyValue("Link", updated.HtmlLink)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -360,9 +350,7 @@ func createDeleteEventHandler(factory *services.Factory) mcp.ToolHandlerFor[Dele
 		rb.KeyValue("Event ID", input.EventID)
 		rb.KeyValue("Calendar", calID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -439,9 +427,7 @@ func createQueryFreeBusyHandler(factory *services.Factory) mcp.ToolHandlerFor[Qu
 			})
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, QueryFreeBusyOutput{Calendars: calendars}, nil
+		return rb.TextResult(), QueryFreeBusyOutput{Calendars: calendars}, nil
 	}
 }
 

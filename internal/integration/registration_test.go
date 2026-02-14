@@ -56,10 +56,7 @@ func TestMain(m *testing.M) {
 func createTestServer(t *testing.T) *mcp.Server {
 	t.Helper()
 
-	tokenStore, err := auth.NewFileTokenStore(sharedCfg.CredentialsDir)
-	if err != nil {
-		t.Fatalf("creating token store: %v", err)
-	}
+	tokenStore := auth.NewInMemoryTokenStore()
 
 	scopes := auth.AllScopes(sharedCfg.EnabledServices, sharedCfg.ReadOnly)
 	oauthMgr := auth.NewOAuthManager(

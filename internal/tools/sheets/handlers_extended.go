@@ -8,6 +8,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/color"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
@@ -76,9 +77,7 @@ func createListSpreadsheetsHandler(factory *services.Factory) mcp.ToolHandlerFor
 			rb.Line("    ID: %s | Modified: %s", f.Id, f.ModifiedTime)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListSpreadsheetsOutput{Spreadsheets: spreadsheets}, nil
+		return rb.TextResult(), ListSpreadsheetsOutput{Spreadsheets: spreadsheets}, nil
 	}
 }
 
@@ -138,9 +137,7 @@ func createGetSpreadsheetInfoHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.Item("%s (ID: %d, %dx%d)", si.Title, si.SheetID, si.RowCount, si.ColCount)
 		}
 
-		return &mcp.CallToolResult{
-				Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-			}, GetSpreadsheetInfoOutput{
+		return rb.TextResult(), GetSpreadsheetInfoOutput{
 				Title:  ss.Properties.Title,
 				URL:    ss.SpreadsheetUrl,
 				Locale: ss.Properties.Locale,
@@ -262,9 +259,7 @@ func createFormatSheetRangeHandler(factory *services.Factory) mcp.ToolHandlerFor
 		rb.KeyValue("Spreadsheet", input.SpreadsheetID)
 		rb.KeyValue("Range", fmt.Sprintf("Sheet %d: R%d:R%d C%d:C%d", input.SheetID, input.StartRow, input.EndRow, input.StartCol, input.EndCol))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -353,9 +348,7 @@ func createAddConditionalFormattingHandler(factory *services.Factory) mcp.ToolHa
 		rb.KeyValue("Spreadsheet", input.SpreadsheetID)
 		rb.KeyValue("Rule Type", input.RuleType)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -430,9 +423,7 @@ func createUpdateConditionalFormattingHandler(factory *services.Factory) mcp.Too
 		rb.KeyValue("Spreadsheet", input.SpreadsheetID)
 		rb.KeyValue("Rule Index", input.RuleIndex)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -473,9 +464,7 @@ func createDeleteConditionalFormattingHandler(factory *services.Factory) mcp.Too
 		rb.KeyValue("Spreadsheet", input.SpreadsheetID)
 		rb.KeyValue("Rule Index", input.RuleIndex)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -483,38 +472,15 @@ func createDeleteConditionalFormattingHandler(factory *services.Factory) mcp.Too
 
 // parseSheetColor converts a hex color (#RRGGBB) to a Sheets Color.
 func parseSheetColor(hex string) *sheets.Color {
-	hex = trimHash(hex)
-	if len(hex) != 6 {
+	r, g, b, ok := color.HexToRGB(hex)
+	if !ok {
 		return nil
 	}
 	return &sheets.Color{
-		Red:   float64(hexVal(hex[0:2])) / 255.0,
-		Green: float64(hexVal(hex[2:4])) / 255.0,
-		Blue:  float64(hexVal(hex[4:6])) / 255.0,
+		Red:   r,
+		Green: g,
+		Blue:  b,
 	}
-}
-
-func trimHash(s string) string {
-	if s != "" && s[0] == '#' {
-		return s[1:]
-	}
-	return s
-}
-
-func hexVal(hex string) byte {
-	var val byte
-	for _, c := range hex {
-		val *= 16
-		switch {
-		case c >= '0' && c <= '9':
-			val += byte(c - '0')
-		case c >= 'a' && c <= 'f':
-			val += byte(c-'a') + 10
-		case c >= 'A' && c <= 'F':
-			val += byte(c-'A') + 10
-		}
-	}
-	return val
 }
 
 func joinFields(fields []string) string {

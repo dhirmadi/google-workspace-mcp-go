@@ -58,8 +58,6 @@ func createCreateSheetHandler(factory *services.Factory) mcp.ToolHandlerFor[Crea
 			rb.KeyValue("Index", fmt.Sprintf("%d", props.Index))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

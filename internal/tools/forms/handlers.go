@@ -47,9 +47,7 @@ func createCreateFormHandler(factory *services.Factory) mcp.ToolHandlerFor[Creat
 		rb.KeyValue("Responder URI", created.ResponderUri)
 		rb.KeyValue("Edit URL", fmt.Sprintf("https://docs.google.com/forms/d/%s/edit", created.FormId))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -125,9 +123,7 @@ func createGetFormHandler(factory *services.Factory) mcp.ToolHandlerFor[GetFormI
 			Items:        items,
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -209,9 +205,7 @@ func createListFormResponsesHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.Line("    Answers: %d", len(frs.Answers))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListFormResponsesOutput{Responses: responses, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListFormResponsesOutput{Responses: responses, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -256,9 +250,7 @@ func createSetPublishSettingsHandler(factory *services.Factory) mcp.ToolHandlerF
 		rb.KeyValue("Form ID", input.FormID)
 		rb.KeyValue("Is Quiz", input.IsQuiz)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -316,9 +308,7 @@ func createGetFormResponseHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.Item("Q[%s]: %s", qID, val)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -359,9 +349,7 @@ func createBatchUpdateFormHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			rb.KeyValue("Title", result.Form.Info.Title)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 

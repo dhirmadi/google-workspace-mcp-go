@@ -55,9 +55,17 @@ func run(ctx context.Context, logger *slog.Logger) error {
 	}
 
 	// Initialize token store
-	tokenStore, err := auth.NewFileTokenStore(cfg.CredentialsDir)
-	if err != nil {
-		return fmt.Errorf("initializing token store: %w", err)
+	var tokenStore auth.TokenStore
+	if cfg.PersistentAuth {
+		fileStore, err := auth.NewFileTokenStore(cfg.CredentialsDir)
+		if err != nil {
+			return fmt.Errorf("initializing file token store: %w", err)
+		}
+		tokenStore = fileStore
+		slog.Info("using persistent file-based token store", "dir", cfg.CredentialsDir)
+	} else {
+		tokenStore = auth.NewInMemoryTokenStore()
+		slog.Info("using in-memory token store (tokens will not survive restart)")
 	}
 
 	// Determine scopes
@@ -108,6 +116,7 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		"transport", cfg.Server.Transport,
 		"tier", cfg.ToolTier,
 		"readOnly", cfg.ReadOnly,
+		"persistentAuth", cfg.PersistentAuth,
 	)
 
 	// Start server on selected transport
@@ -130,8 +139,12 @@ func run(ctx context.Context, logger *slog.Logger) error {
 
 		addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 		httpServer := &http.Server{
-			Addr:    addr,
-			Handler: mux,
+			Addr:              addr,
+			Handler:           mux,
+			ReadTimeout:       30 * time.Second,
+			WriteTimeout:      60 * time.Second,
+			ReadHeaderTimeout: 10 * time.Second,
+			IdleTimeout:       120 * time.Second,
 		}
 
 		// Graceful shutdown

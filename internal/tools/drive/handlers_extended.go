@@ -10,6 +10,7 @@ import (
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/validate"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
 )
 
@@ -41,6 +42,9 @@ func createListDriveItemsHandler(factory *services.Factory) mcp.ToolHandlerFor[L
 		folderID := input.FolderID
 		if folderID == "" {
 			folderID = "root"
+		}
+		if err := validate.DriveID(folderID); err != nil {
+			return nil, ListDriveItemsOutput{}, err
 		}
 
 		q := fmt.Sprintf("'%s' in parents and trashed=false", folderID)
@@ -80,9 +84,7 @@ func createListDriveItemsHandler(factory *services.Factory) mcp.ToolHandlerFor[L
 			rb.Line("    ID: %s", fs.ID)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ListDriveItemsOutput{Files: files, NextPageToken: result.NextPageToken}, nil
+		return rb.TextResult(), ListDriveItemsOutput{Files: files, NextPageToken: result.NextPageToken}, nil
 	}
 }
 
@@ -127,9 +129,7 @@ func createCopyFileHandler(factory *services.Factory) mcp.ToolHandlerFor[CopyFil
 			rb.KeyValue("Link", created.WebViewLink)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -189,9 +189,7 @@ func createUpdateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[Updat
 			rb.KeyValue("Link", updated.WebViewLink)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -225,9 +223,7 @@ func createUpdatePermissionHandler(factory *services.Factory) mcp.ToolHandlerFor
 		rb.KeyValue("File ID", input.FileID)
 		rb.KeyValue("Permission", formatPermission(updated))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -257,9 +253,7 @@ func createRemovePermissionHandler(factory *services.Factory) mcp.ToolHandlerFor
 		rb.KeyValue("File ID", input.FileID)
 		rb.KeyValue("Permission ID", input.PermissionID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -294,9 +288,7 @@ func createTransferOwnershipHandler(factory *services.Factory) mcp.ToolHandlerFo
 		rb.KeyValue("File ID", input.FileID)
 		rb.KeyValue("New Owner", input.NewOwnerEmail)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -368,8 +360,6 @@ func createBatchShareHandler(factory *services.Factory) mcp.ToolHandlerFor[Batch
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

@@ -42,9 +42,7 @@ func createGetTaskListHandler(factory *services.Factory) mcp.ToolHandlerFor[GetT
 		rb.KeyValue("ID", tl.Id)
 		rb.KeyValue("Updated", tl.Updated)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetTaskListOutput{TaskList: summary}, nil
+		return rb.TextResult(), GetTaskListOutput{TaskList: summary}, nil
 	}
 }
 
@@ -76,9 +74,7 @@ func createCreateTaskListHandler(factory *services.Factory) mcp.ToolHandlerFor[C
 		rb.KeyValue("Title", created.Title)
 		rb.KeyValue("ID", created.Id)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -111,9 +107,7 @@ func createUpdateTaskListHandler(factory *services.Factory) mcp.ToolHandlerFor[U
 		rb.KeyValue("Title", updated.Title)
 		rb.KeyValue("ID", updated.Id)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -140,9 +134,7 @@ func createDeleteTaskListHandler(factory *services.Factory) mcp.ToolHandlerFor[D
 		rb.Header("Task List Deleted")
 		rb.KeyValue("Task List ID", input.TaskListID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -185,9 +177,7 @@ func createMoveTaskHandler(factory *services.Factory) mcp.ToolHandlerFor[MoveTas
 			rb.KeyValue("Parent", moved.Parent)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -215,8 +205,6 @@ func createClearCompletedTasksHandler(factory *services.Factory) mcp.ToolHandler
 		rb.KeyValue("Task List ID", input.TaskListID)
 		rb.Line("All completed tasks have been removed from the task list.")
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

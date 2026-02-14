@@ -41,9 +41,7 @@ func createGenerateTriggerCodeHandler() mcp.ToolHandlerFor[GenerateTriggerCodeIn
 		rb.Blank()
 		rb.Line("To install: paste this code into your Apps Script project and run the createTrigger function once.")
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GenerateTriggerCodeOutput{Code: code, TriggerType: input.TriggerType}, nil
+		return rb.TextResult(), GenerateTriggerCodeOutput{Code: code, TriggerType: input.TriggerType}, nil
 	}
 }
 

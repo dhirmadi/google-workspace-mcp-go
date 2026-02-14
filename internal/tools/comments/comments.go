@@ -157,9 +157,7 @@ func createReadCommentsHandler(factory *services.Factory, _ string) mcp.ToolHand
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, ReadCommentsOutput{Comments: comments}, nil
+		return rb.TextResult(), ReadCommentsOutput{Comments: comments}, nil
 	}
 }
 
@@ -188,9 +186,7 @@ func createCreateCommentHandler(factory *services.Factory, _ string) mcp.ToolHan
 		rb.KeyValue("ID", created.Id)
 		rb.KeyValue("Author", created.Author.DisplayName)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -219,9 +215,7 @@ func createReplyToCommentHandler(factory *services.Factory, _ string) mcp.ToolHa
 		rb.KeyValue("Reply ID", created.Id)
 		rb.KeyValue("Comment ID", input.CommentID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -249,9 +243,7 @@ func createResolveCommentHandler(factory *services.Factory, _ string) mcp.ToolHa
 		rb.KeyValue("Comment ID", input.CommentID)
 		rb.KeyValue("File ID", input.FileID)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 

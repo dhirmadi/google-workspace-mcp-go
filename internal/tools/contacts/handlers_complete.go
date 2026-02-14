@@ -69,9 +69,7 @@ func createBatchCreateContactsHandler(factory *services.Factory) mcp.ToolHandler
 			}
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -123,9 +121,7 @@ func createBatchUpdateContactsHandler(factory *services.Factory) mcp.ToolHandler
 		rb.Header("Batch Contacts Updated")
 		rb.KeyValue("Updated", len(result.UpdateResult))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -156,9 +152,7 @@ func createBatchDeleteContactsHandler(factory *services.Factory) mcp.ToolHandler
 		rb.Header("Batch Contacts Deleted")
 		rb.KeyValue("Deleted", len(input.ResourceNames))
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -192,9 +186,7 @@ func createCreateContactGroupHandler(factory *services.Factory) mcp.ToolHandlerF
 		rb.KeyValue("Name", created.Name)
 		rb.KeyValue("Resource Name", created.ResourceName)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -229,9 +221,7 @@ func createUpdateContactGroupHandler(factory *services.Factory) mcp.ToolHandlerF
 		rb.KeyValue("Name", updated.Name)
 		rb.KeyValue("Resource Name", updated.ResourceName)
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -267,9 +257,7 @@ func createDeleteContactGroupHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.Line("Associated contacts were also deleted.")
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }
 
@@ -317,8 +305,6 @@ func createModifyGroupMembersHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.KeyValue("Not Found", strings.Join(result.NotFoundResourceNames, ", "))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

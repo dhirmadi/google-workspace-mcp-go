@@ -10,6 +10,8 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/validate"
 )
 
 // OAuthManager handles OAuth2 configuration and token exchange.
@@ -38,6 +40,9 @@ func NewOAuthManager(clientID, clientSecret, redirectURL string, scopes []string
 // GetAuthURL returns the URL for the user to authenticate.
 // The state parameter is the user email signed with HMAC to prevent CSRF.
 func (m *OAuthManager) GetAuthURL(userEmail string) string {
+	if err := validate.Email(userEmail); err != nil {
+		return ""
+	}
 	state := m.signState(userEmail)
 	return m.config.AuthCodeURL(state, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 }

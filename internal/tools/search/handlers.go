@@ -184,9 +184,7 @@ func createGetSearchEngineInfoHandler(factory *services.Factory, cseID string) m
 			rb.KeyValue("Search Time", fmt.Sprintf("%.3fs", result.SearchInformation.SearchTime))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }
 
@@ -233,7 +231,5 @@ func buildSearchResponse(result *customsearch.Search, query string) (*mcp.CallTo
 		output.SearchTime = result.SearchInformation.SearchTime
 	}
 
-	return &mcp.CallToolResult{
-		Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-	}, output, nil
+	return rb.TextResult(), output, nil
 }

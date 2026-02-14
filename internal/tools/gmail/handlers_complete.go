@@ -88,9 +88,7 @@ func createBatchGetThreadsHandler(factory *services.Factory) mcp.ToolHandlerFor[
 			threads = append(threads, ts)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, BatchGetThreadsOutput{Threads: threads}, nil
+		return rb.TextResult(), BatchGetThreadsOutput{Threads: threads}, nil
 	}
 }
 
@@ -135,8 +133,6 @@ func createBatchModifyLabelsHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.KeyValue("Labels Removed", len(input.RemoveLabelIDs))
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, nil, nil
+		return rb.TextResult(), nil, nil
 	}
 }

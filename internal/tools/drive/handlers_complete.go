@@ -77,9 +77,7 @@ func createGetFilePermissionsHandler(factory *services.Factory) mcp.ToolHandlerF
 			rb.Line("    ID: %s", p.Id)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, GetFilePermissionsOutput{FileID: input.FileID, Permissions: perms}, nil
+		return rb.TextResult(), GetFilePermissionsOutput{FileID: input.FileID, Permissions: perms}, nil
 	}
 }
 
@@ -144,8 +142,6 @@ func createCheckPublicAccessHandler(factory *services.Factory) mcp.ToolHandlerFo
 			rb.KeyValue("Domain Role", output.DomainRole)
 		}
 
-		return &mcp.CallToolResult{
-			Content: []mcp.Content{&mcp.TextContent{Text: rb.Build()}},
-		}, output, nil
+		return rb.TextResult(), output, nil
 	}
 }

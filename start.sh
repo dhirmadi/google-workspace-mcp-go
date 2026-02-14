@@ -7,18 +7,20 @@
 # Examples:
 #   ./start.sh "123456.apps.googleusercontent.com" "GOCSPX-abc123"
 #   ./start.sh "123456.apps.googleusercontent.com" "GOCSPX-abc123" --port 9000
-#   ./start.sh "123456.apps.googleusercontent.com" "GOCSPX-abc123" --services gmail,drive,calendar --email user@gmail.com
+#   ./start.sh "123456.apps.googleusercontent.com" "GOCSPX-abc123" --persistent-auth
+#   ./start.sh "123456.apps.googleusercontent.com" "GOCSPX-abc123" --services gmail,drive,calendar
 #
 # Options:
-#   --port PORT         HTTP port (default: 8000)
-#   --services SVCS     Comma-separated services to enable (default: all)
-#                       Options: gmail,drive,calendar,docs,sheets,chat,
-#                                forms,slides,tasks,contacts,search,appscript
-#   --email EMAIL       Default user email for authentication
-#   --cse-id ID         Google Custom Search Engine ID (for search tools)
-#   --log-level LEVEL   Log level: debug, info, warn, error (default: info)
-#   --rebuild           Force rebuild of the Docker image
-#   --stop              Stop and remove existing container, then exit
+#   --port PORT           HTTP port (default: 8000)
+#   --services SVCS       Comma-separated services to enable (default: all)
+#                         Options: gmail,drive,calendar,docs,sheets,chat,
+#                                  forms,slides,tasks,contacts,search,appscript
+#   --persistent-auth     Persist OAuth tokens to disk (Docker volume)
+#   --email EMAIL         Default user email for authentication
+#   --cse-id ID           Google Custom Search Engine ID (for search tools)
+#   --log-level LEVEL     Log level: debug, info, warn, error (default: info)
+#   --rebuild             Force rebuild of the Docker image
+#   --stop                Stop and remove existing container, then exit
 
 set -euo pipefail
 
@@ -30,6 +32,7 @@ SERVICES=""
 EMAIL=""
 CSE_ID=""
 LOG_LEVEL="info"
+PERSISTENT_AUTH=false
 REBUILD=false
 STOP_ONLY=false
 
@@ -59,7 +62,7 @@ case "${1:-}" in
         STOP_ONLY=true
         ;;
     --help|-h)
-        head -20 "$0" | grep '^#' | sed 's/^# \?//'
+        head -24 "$0" | grep '^#' | sed 's/^# \?//'
         exit 0
         ;;
 esac
@@ -79,12 +82,13 @@ shift 2
 # Parse optional flags
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --port)       PORT="$2";       shift 2 ;;
-        --services)   SERVICES="$2";   shift 2 ;;
-        --email)      EMAIL="$2";      shift 2 ;;
-        --cse-id)     CSE_ID="$2";     shift 2 ;;
-        --log-level)  LOG_LEVEL="$2";  shift 2 ;;
-        --rebuild)    REBUILD=true;    shift   ;;
+        --port)             PORT="$2";       shift 2 ;;
+        --services)         SERVICES="$2";   shift 2 ;;
+        --email)            EMAIL="$2";      shift 2 ;;
+        --cse-id)           CSE_ID="$2";     shift 2 ;;
+        --log-level)        LOG_LEVEL="$2";  shift 2 ;;
+        --persistent-auth)  PERSISTENT_AUTH=true; shift ;;
+        --rebuild)          REBUILD=true;    shift   ;;
         *)
             error "Unknown option: $1"
             exit 1
@@ -138,15 +142,21 @@ RUN_ARGS=(
     -e "MCP_PORT=8000"
     -e "WORKSPACE_MCP_HOST=0.0.0.0"
     -e "WORKSPACE_MCP_BASE_URI=http://localhost:${PORT}"
-    -e "WORKSPACE_MCP_CREDENTIALS_DIR=/data/credentials"
     -e "LOG_LEVEL=${LOG_LEVEL}"
-    -v "mcp-credentials:/data/credentials"
     --restart unless-stopped
 )
 
+# Persistent auth: mount Docker volume for token storage
+if [[ "$PERSISTENT_AUTH" == "true" ]]; then
+    RUN_ARGS+=(
+        -e "WORKSPACE_MCP_PERSISTENT_AUTH=true"
+        -e "WORKSPACE_MCP_CREDENTIALS_DIR=/data/credentials"
+        -v "mcp-credentials:/data/credentials"
+    )
+fi
+
 if [[ -n "$EMAIL" ]]; then
     RUN_ARGS+=(-e "USER_GOOGLE_EMAIL=${EMAIL}")
-    RUN_ARGS+=(-e "MCP_SINGLE_USER_MODE=true")
 fi
 
 if [[ -n "$SERVICES" ]]; then
@@ -190,8 +200,13 @@ echo -e "  Services:    all (gmail,drive,calendar,docs,sheets,chat,forms,slides,
 fi
 echo -e "  Log level:   ${LOG_LEVEL}"
 echo -e "  Container:   ${CONTAINER_NAME}"
+if [[ "$PERSISTENT_AUTH" == "true" ]]; then
+echo -e "  Auth mode:   ${CYAN}persistent${NC} (tokens saved to Docker volume)"
+else
+echo -e "  Auth mode:   in-memory (tokens lost on container restart)"
+fi
 if [[ -n "$EMAIL" ]]; then
-echo -e "  User email:  ${EMAIL} (single-user mode)"
+echo -e "  User email:  ${EMAIL}"
 fi
 echo ""
 echo -e "  ${YELLOW}Next steps:${NC}"

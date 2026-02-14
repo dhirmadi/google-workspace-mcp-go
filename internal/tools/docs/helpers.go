@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	docspb "google.golang.org/api/docs/v1"
+
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/color"
 )
 
 // DocSummary is a compact representation of a Google Doc.
@@ -194,39 +196,17 @@ func buildTextStyleFields(bold, italic, underline *bool, fontSize *int, fontFami
 
 // parseColor converts a hex color (#RRGGBB) to a Docs OptionalColor.
 func parseColor(hex string) *docspb.OptionalColor {
-	hex = strings.TrimPrefix(hex, "#")
-	if len(hex) != 6 {
+	r, g, b, ok := color.HexToRGB(hex)
+	if !ok {
 		return nil
 	}
-
-	r := hexToByte(hex[0:2])
-	g := hexToByte(hex[2:4])
-	b := hexToByte(hex[4:6])
-
 	return &docspb.OptionalColor{
 		Color: &docspb.Color{
 			RgbColor: &docspb.RgbColor{
-				Red:   float64(r) / 255.0,
-				Green: float64(g) / 255.0,
-				Blue:  float64(b) / 255.0,
+				Red:   r,
+				Green: g,
+				Blue:  b,
 			},
 		},
 	}
-}
-
-// hexToByte converts a 2-char hex string to a byte value.
-func hexToByte(hex string) byte {
-	var val byte
-	for _, c := range hex {
-		val *= 16
-		switch {
-		case c >= '0' && c <= '9':
-			val += byte(c - '0')
-		case c >= 'a' && c <= 'f':
-			val += byte(c-'a') + 10
-		case c >= 'A' && c <= 'F':
-			val += byte(c-'A') + 10
-		}
-	}
-	return val
 }
