@@ -138,11 +138,11 @@ func createGetSpreadsheetInfoHandler(factory *services.Factory) mcp.ToolHandlerF
 		}
 
 		return rb.TextResult(), GetSpreadsheetInfoOutput{
-				Title:  ss.Properties.Title,
-				URL:    ss.SpreadsheetUrl,
-				Locale: ss.Properties.Locale,
-				Sheets: sheetInfos,
-			}, nil
+			Title:  ss.Properties.Title,
+			URL:    ss.SpreadsheetUrl,
+			Locale: ss.Properties.Locale,
+			Sheets: sheetInfos,
+		}, nil
 	}
 }
 

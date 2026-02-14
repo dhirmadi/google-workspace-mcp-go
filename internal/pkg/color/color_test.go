@@ -7,10 +7,10 @@ import (
 
 func TestHexToRGB(t *testing.T) {
 	tests := []struct {
-		name       string
-		hex        string
-		r, g, b    float64
-		wantOK     bool
+		name    string
+		hex     string
+		r, g, b float64
+		wantOK  bool
 	}{
 		{"black", "#000000", 0, 0, 0, true},
 		{"white", "#FFFFFF", 1, 1, 1, true},
