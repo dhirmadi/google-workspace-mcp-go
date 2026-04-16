@@ -11,6 +11,7 @@ Start here, then open the files that match your role.
 | **OAuth, scopes, or identity** | [`auth-and-scopes.md`](auth-and-scopes.md) | [`security.md`](security.md) |
 | **Security / compliance review** | [`security.md`](security.md) | [`auth-and-scopes.md`](auth-and-scopes.md), [`README.md`](../README.md) (authentication section) |
 | **Planning or sequencing work** | [`roadmap/README.md`](roadmap/README.md) | [`implementation-plan.md`](implementation-plan.md) (historical bootstrap), [`templates/roadmap_item.md`](templates/roadmap_item.md) |
+| **Delivering roadmap items (Claude Code)** | [`../CLAUDE.md`](../CLAUDE.md) | Project **`.claude/commands/`** — `/implement-roadmapitem`, `/review-roadmapitem`, `/podman-mcp-local-verify`; **`.claude/agents/`** (e.g. Podman local test); skills under **`.claude/skills/`** |
 | **Looking up official Google API URLs** | [`google-workspace-api-documentation.md`](google-workspace-api-documentation.md) | Product hubs linked from that page |
 
 ## Canonical references
@@ -30,6 +31,7 @@ Start here, then open the files that match your role.
 - Overview and sequencing: [`roadmap/README.md`](roadmap/README.md)
 - Closed items: [`roadmap/archive/README.md`](roadmap/archive/README.md)
 - New epic template: [`templates/roadmap_item.md`](templates/roadmap_item.md)
+- **Claude Code**: [`../CLAUDE.md`](../CLAUDE.md) and [`../.claude/`](../.claude/) — roadmap TDD + review commands and skills
 
 ## Counts and drift
 

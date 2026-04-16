@@ -5,7 +5,8 @@
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GOOGLE_OAUTH_CLIENT_ID` | Yes | — | OAuth client ID |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | Yes | — | OAuth client secret |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Cond. | — | OAuth client secret (required unless public client mode) |
+| `GOOGLE_OAUTH_PUBLIC_CLIENT` | No | `false` | Enable PKCE public client mode — no secret needed. Use with a Google **Desktop/Native** client type and `http://localhost:<port>/oauth/callback` redirect URI |
 | `GOOGLE_CSE_ID` | No* | — | Custom Search Engine ID (required for search tools) |
 | `USER_GOOGLE_EMAIL` | No | — | Default email for single-user mode |
 | `WORKSPACE_MCP_CREDENTIALS_DIR` | No | `~/.google_workspace_mcp/credentials` | Credential storage directory |
@@ -33,6 +34,7 @@ Flags:
   --tool-tier string     Load tools by tier: core, extended, or complete
   --single-user          Bypass session mapping, use any credentials
   --read-only            Request only read-only scopes, disable write tools
+  --public-client        Use public OAuth client with PKCE (no client secret required)
   --cli [command]        Direct tool invocation mode (no server)
 ```
 
@@ -82,6 +84,7 @@ type Config struct {
         ClientID     string // GOOGLE_OAUTH_CLIENT_ID
         ClientSecret string // GOOGLE_OAUTH_CLIENT_SECRET
         RedirectURL  string
+        PublicClient bool   // GOOGLE_OAUTH_PUBLIC_CLIENT / --public-client
     }
     Server struct {
         Transport string

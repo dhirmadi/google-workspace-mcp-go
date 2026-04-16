@@ -76,9 +76,15 @@ func run(ctx context.Context, logger *slog.Logger) error {
 		cfg.OAuth.ClientID,
 		cfg.OAuth.ClientSecret,
 		cfg.OAuth.RedirectURL,
+		cfg.OAuth.PublicClient,
 		scopes,
 		tokenStore,
 	)
+	if cfg.OAuth.PublicClient {
+		slog.Info("OAuth mode: public client (PKCE, no client secret required)")
+	} else {
+		slog.Info("OAuth mode: confidential client (client secret)")
+	}
 
 	// Create service factory
 	factory := services.NewFactory(oauthMgr)

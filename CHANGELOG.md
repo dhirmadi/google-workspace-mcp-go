@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **AUTH-01** — PKCE & public (secret-less) client support. Set `GOOGLE_OAUTH_PUBLIC_CLIENT=true` to run without `GOOGLE_OAUTH_CLIENT_SECRET`; the legacy OAuth flow now appends S256 PKCE parameters (`code_challenge` / `code_verifier`) per RFC 7636. Confidential-client mode (ID + secret) is unchanged. (`internal/auth/oauth.go`, `internal/config/config.go`)
+- **`.claude/`** — Claude Code: slash commands **`/implement-roadmapitem`** (spec-first TDD) and **`/review-roadmapitem`** (security/quality/docs/performance); skills **`google-workspace-mcp-go`**, **`roadmap-spec-tdd`**, **`mcp-security-review`**; team **`settings.json`**. Personal overrides: **`.claude/settings.local.json`** (gitignored).
+- **`.claude/agents/podman-mcp-local-test.md`** + **`/podman-mcp-local-verify`** — Podman **build → run → verify `/mcp` → stop → rm → rmi** for local smoke tests.
+
 ### Changed
 
+- **`CLAUDE.md`**: Documents `.claude` commands/skills and roadmap delivery flow.
+- **`docs/README.md`**: Role table + roadmap section link to **`.claude/`** and **`/implement-roadmapitem`** / **`/review-roadmapitem`**.
 - **README**: Restructured for 2026-style operator documentation — badges (CI, Go, release), role-oriented tables, TOC, prerequisites, GHCR pull instructions, expanded env reference with links to `docs/configuration.md`, troubleshooting table, contributing strip, clearer MCP transport defaults and spec compliance summary.
 
 ## [1.3.0] — 2026-04-16

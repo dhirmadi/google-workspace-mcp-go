@@ -19,6 +19,7 @@ func testOAuthMgr() *auth.OAuthManager {
 		"test-client-id",
 		"test-client-secret",
 		"http://localhost:8000/oauth/callback",
+		false, // confidential client (secret-based)
 		[]string{"https://www.googleapis.com/auth/gmail.readonly"},
 		nil, // token store not used for URL generation
 	)

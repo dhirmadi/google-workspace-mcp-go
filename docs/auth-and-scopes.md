@@ -7,6 +7,19 @@ The server supports two OAuth modes:
 1. **Legacy OAuth 2.0** (default): Server manages tokens locally in a credentials directory. Users authenticate via the `start_google_auth` tool which launches a browser-based OAuth flow.
 2. **OAuth 2.1** (`MCP_ENABLE_OAUTH21=true`): The MCP client handles authentication. The `start_google_auth` tool is disabled.
 
+### Confidential vs Public Client (PKCE)
+
+Within Legacy OAuth 2.0, the server supports two client types:
+
+- **Confidential client** (default): Requires both `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET`. Uses the standard authorization code flow.
+- **Public client** (`GOOGLE_OAUTH_PUBLIC_CLIENT=true` or `--public-client`): Requires only `GOOGLE_OAUTH_CLIENT_ID`. Uses **PKCE (RFC 7636)** with S256 challenge method — no client secret needed.
+
+Public client mode is designed for **Google Desktop/Native** client types created in the Google Cloud Console. The redirect URI must be `http://localhost:<port>/oauth/callback`.
+
+> **Google Cloud Console setup for public clients**: Create an OAuth client with application type **Desktop app** (not Web application). Desktop clients do not require a client secret for the authorization code + PKCE flow.
+
+PKCE verifiers are stored per-user in memory and consumed on a single token exchange. Only one in-flight auth flow per user email is supported — starting a new flow abandons any previous pending flow for that user.
+
 ### MCP 2025-11-25 Authorization Updates
 
 The MCP spec 2025-11-25 overhauled the authorization model significantly:

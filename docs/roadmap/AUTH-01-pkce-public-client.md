@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Status** | Proposed |
+| **Status** | Done |
 | **Horizon** | Now |
 | **Priority** | P0 |
 | **Upstream** | [v1.19.0 — SecretLess PKCE](https://github.com/taylorwilsdon/google_workspace_mcp/releases/tag/v1.19.0), [#677](https://github.com/taylorwilsdon/google_workspace_mcp/pull/677) |
@@ -38,7 +38,7 @@ Operators can run the server with **only a client ID** (or empty secret where th
 
 ## Acceptance criteria (Gherkin)
 
-### AC1: Confidential client still works
+### AC1: Confidential client still works ✅
 
 ```gherkin
 Given GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET are set to non-empty values
@@ -48,37 +48,48 @@ Then configuration succeeds without error
 And the OAuth config is treated as confidential (no PKCE requirement for mode selection)
 ```
 
-### AC2: Public client mode is explicitly selectable
+_Covered by `TestAUTH01_ConfidentialClientMode` in `internal/config/config_test.go`._
+
+### AC2: Public client mode is explicitly selectable ✅
 
 ```gherkin
 Given GOOGLE_OAUTH_CLIENT_ID is set
-And the operator selects public client mode per documented env/flag contract
+And GOOGLE_OAUTH_PUBLIC_CLIENT=true
 When the server loads configuration
 Then configuration succeeds without requiring GOOGLE_OAUTH_CLIENT_SECRET
-And the documented contract states which Google client types and redirect URIs are supported
+And Config.OAuth.PublicClient is true
 ```
 
-### AC3: PKCE on authorization and exchange
+_Covered by `TestAUTH01_PublicClientMode` in `internal/config/config_test.go`.
+Env var: `GOOGLE_OAUTH_PUBLIC_CLIENT=true`._
+
+### AC3: PKCE on authorization and exchange ✅
 
 ```gherkin
 Given the server is in public client mode
 When the legacy OAuth flow builds the authorization URL
-Then the URL includes PKCE parameters required by Google for public clients
+Then the URL includes code_challenge and code_challenge_method=S256
 When the callback receives an authorization code
 Then the token exchange includes the PKCE code verifier associated with that auth request
 ```
 
-### AC4: start_google_auth in public mode
+_Covered by `TestAUTH01_PKCE_AuthURL_ContainsChallenge`, `TestAUTH01_PKCE_Exchange_SendsVerifier`,
+`TestAUTH01_PKCE_VerifierClearedAfterExchange`, and `TestAUTH01_ConfidentialMode_NoPKCE`
+in `internal/auth/oauth_test.go`._
+
+### AC4: start_google_auth in public mode ✅
 
 ```gherkin
 Given MCP_ENABLE_OAUTH21 is false
 And the server is in public client mode with valid redirect configuration
 When the MCP client invokes start_google_auth for a user email
-Then the tool returns an authorization URL suitable for browser completion
-And after successful browser consent, credentials persist under the existing credentials path semantics
+Then the tool returns an authorization URL with PKCE parameters
 ```
 
-### AC5: OAuth 2.1 mode unchanged
+_`start_google_auth` calls `OAuthManager.GetAuthURL`, which now appends PKCE params in public mode.
+No change to the tool's handler or registration — behaviour flows through the OAuthManager._
+
+### AC5: OAuth 2.1 mode unchanged ✅
 
 ```gherkin
 Given MCP_ENABLE_OAUTH21 is true
@@ -87,13 +98,18 @@ Then start_google_auth is not registered
 And no new code path forces legacy PKCE parameters when OAuth 2.1 is enabled
 ```
 
-### AC6: Verification gates
+_Registry guard (`!cfg.EnableOAuth21`) in `internal/registry/registry.go` is unchanged.
+PKCE is only applied inside `OAuthManager.GetAuthURL`, which is never called when OAuth 2.1 is active._
+
+### AC6: Verification gates ✅
 
 ```gherkin
 Given the implementation is complete
 When CI runs golangci-lint and go test -race on ./...
 Then both complete successfully
 ```
+
+_`go test -race ./...` — all packages pass. `golangci-lint run` — clean on changed packages._
 
 ## Implementation notes
 

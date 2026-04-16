@@ -32,3 +32,6 @@ go.work.sum
 .cursor/
 AGENTS.md
 .cursorignore
+
+# Claude Code — personal overrides (project `.claude/` is committed)
+.claude/settings.local.json
