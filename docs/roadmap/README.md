@@ -1,6 +1,6 @@
 # Roadmap
 
-Outcome-oriented work derived from **repo goals** (`docs/implementation-plan.md`, `docs/tools-inventory.md`) and drift vs the upstream **[google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)** project (releases and community PRs). This folder is the **planning source**; implementation detail stays in `docs/code-patterns.md`, `docs/auth-and-scopes.md`, and service-specific docs.
+Outcome-oriented work derived from **repo goals** (`docs/README.md`, `docs/implementation-plan.md`, `docs/tools-inventory.md`) and drift vs the upstream **[google_workspace_mcp](https://github.com/taylorwilsdon/google_workspace_mcp)** project (releases and community PRs). This folder is the **planning source**; implementation detail stays in `docs/code-patterns.md`, `docs/auth-and-scopes.md`, and service-specific docs.
 
 **This `README.md` is the roadmap overview** — keep the **horizon summary**, **sequencing**, and **items index** current whenever you add, rename, split, merge, or change status/priority of roadmap files.
 

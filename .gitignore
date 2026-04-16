@@ -27,5 +27,8 @@ go.work.sum
 
 .specstory
 .DS_Store
-.cursor
-.cursorindexingignore
+
+# Cursor / local AI editor configuration (keep on your machine; not for GitHub)
+.cursor/
+AGENTS.md
+.cursorignore

@@ -4,6 +4,8 @@ A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives A
 
 **136 tools. 12 services. One container. ~33 MB image.**
 
+Documentation index (by role): **[`docs/README.md`](docs/README.md)**.
+
 ---
 
 ## Getting Started
@@ -43,7 +45,7 @@ The server starts on `http://localhost:8000/mcp` with all 136 tools enabled.
 
 ### Step 4: Connect Your MCP Client
 
-Add to your **Cursor** settings (`.cursor/mcp.json`):
+For **Cursor**, create **`.cursor/mcp.json`** in your project (or merge into your user MCP config). Copy from **`docs/cursor-mcp.json.example`** and adjust the URL if you use a non-default port:
 
 ```json
 {
@@ -73,6 +75,10 @@ Or for **Claude Desktop** (`claude_desktop_config.json`):
 
 The first time you (or the AI agent) use a Google tool, you'll be prompted to authenticate. The agent calls `start_google_auth` with your email, and you open the returned URL in your browser. After granting access, you're all set — tokens are stored and auto-refresh transparently.
 
+### Cursor (this repository)
+
+**`.cursor/` is not committed to git** (local-only). Add your own rules, slash commands, and subagents under `.cursor/` if you use Cursor; use **`docs/cursor-mcp.json.example`** as the starting point for **`mcp.json`**. Adjust the MCP URL if you use a non-default port.
+
 ---
 
 ## start.sh Reference
@@ -91,7 +97,7 @@ The two required arguments are your Google OAuth Client ID and Client Secret. Ev
 
 This starts the server with:
 
-- **All 12 services enabled** (137 tools total)
+- **All 12 services enabled** — **137** MCP tools by default (**136** Google Workspace tools per [`docs/tools-inventory.md`](docs/tools-inventory.md) plus `start_google_auth`; OAuth 2.1 mode omits the auth tool → **136** — see [`docs/auth-and-scopes.md`](docs/auth-and-scopes.md))
 - **Port 8000** — MCP endpoint at `http://localhost:8000/mcp`
 - **OAuth callback** at `http://localhost:8000/oauth/callback`
 - **In-memory auth** — tokens are stored in memory only (lost on restart). Use `--persistent-auth` to persist tokens to a Docker volume.
@@ -118,7 +124,7 @@ The image is built automatically on first run. Subsequent runs reuse the cached 
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID.apps.googleusercontent.com" "GOCSPX-yourSecret"
-# → 137 tools on http://localhost:8000/mcp
+# → 137 MCP tools (136 Workspace + start_google_auth) on http://localhost:8000/mcp
 ```
 
 **Only Gmail, Drive, and Calendar** — fewer tools means less noise for the AI agent:
@@ -290,6 +296,8 @@ To enable persistent auth in Docker Compose, add `WORKSPACE_MCP_PERSISTENT_AUTH=
 The OAuth callback URL is built from the port you pass to `start.sh`. If you use `--port 9000`, the callback goes to `http://localhost:9000/oauth/callback`. Make sure the redirect URI in your [Google Cloud Console](https://console.cloud.google.com/apis/credentials) matches the port you're using.
 
 By default, tokens are stored **in memory only** and lost on restart. With `--persistent-auth`, tokens are stored per-user at `/data/credentials/` (in Docker) or `~/.google_workspace_mcp/credentials/` (local). Token files have `0600` permissions. The credentials directory has `0700` permissions. In Docker, a named volume (`mcp-credentials`) is mounted automatically to persist tokens across restarts.
+
+Persisted tokens are **plain JSON on disk** in v1 (same broad risk class as typical local OAuth token files). Encryption or OS keyring integration is tracked as a future hardening step in [`docs/security.md`](docs/security.md).
 
 ---
 

@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest a new tool, API surface, or improvement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the user outcome. Link Google API docs if you have them.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: Who benefits and how do they use Workspace through this server?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: New tools, flags, config, or doc changes.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope hints
+      options:
+        - label: Touches OAuth scopes or consent
+        - label: Adds destructive or write tools
+        - label: Documentation / operator runbook only

@@ -49,11 +49,11 @@ CLI flags take precedence over environment variables.
 
 Tools are organized into tiers via `configs/tool_tiers.yaml`:
 
-- **core** (44 tools): Essential tools for each service — the minimum for a useful integration
-- **extended** (~51 tools): Additional commonly-used tools for power users
-- **complete** (~41 tools): All tools including debug, batch, and administrative operations
+- **core** (47 tools): Essential tools per service — the minimum for a useful integration ([`tools-inventory.md`](tools-inventory.md) summary column).
+- **extended** (49 tools in the extended tier; **96** cumulative with core): Additional commonly-used tools for power users.
+- **complete** (40 tools in the complete-only tier; **136** cumulative total): All tools including batch and administrative operations.
 
-The tier system is **cumulative**: `extended` includes all `core` tools; `complete` includes all `extended` and `core` tools.
+The tier system is **cumulative**: selecting `extended` registers all **core + extended** tools; `complete` registers **all 136** Workspace tools listed in [`tools-inventory.md`](tools-inventory.md).
 
 ### Tier Filtering Logic
 

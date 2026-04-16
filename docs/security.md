@@ -21,7 +21,7 @@ v1 stores tokens as plain JSON (matching the Python version's behavior). For pro
 - **v1.1**: AES-256-GCM encryption with a machine-derived key
 - **v2**: Integration with OS keyring (macOS Keychain, Linux Secret Service) or cloud secret managers (GCP Secret Manager, Vault)
 
-Document this limitation in the README.
+This limitation is summarized for operators in [**README**](../README.md) (How Authentication Works) and indexed under [**docs/README.md**](README.md).
 
 ## Input Sanitization
 

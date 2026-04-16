@@ -7,6 +7,12 @@
 - **Shared patterns early**: Build the shared comment tools in Phase 2 to validate the DRY pattern before scaling out.
 - **Lint from day one**: Set up `golangci-lint` in Phase 1 to catch issues immediately.
 
+## Document status
+
+The phase checklist below is the **original bootstrap sequence** for this repository. **Phases 1–4 are implemented** in tree (see [`tools-inventory.md`](tools-inventory.md) and [`architecture.md`](architecture.md)). Unchecked `[ ]` items are **not** a live backlog; treat them as historical unless you are verifying a regression. **Current priorities** live in [`roadmap/README.md`](roadmap/README.md).
+
+**Phase 5** (production polish): CI (`.github/workflows/ci.yml`), `docker-compose.yml`, integration tests (`//go:build integration`), README, and tool metadata are largely present — use the repo as source of truth and extend Phase 5 items only where something is still missing.
+
 ---
 
 ## Phase 1: Foundation (Week 1)
