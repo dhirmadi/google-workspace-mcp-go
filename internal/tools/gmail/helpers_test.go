@@ -416,3 +416,30 @@ func TestMessageToDetailWithoutAttachments(t *testing.T) {
 		t.Errorf("expected no attachments, got %d", len(detail.Attachments))
 	}
 }
+
+func TestBuildRawMessageSubjectUTF8RFC2047(t *testing.T) {
+	raw := buildRawMessage("bob@example.com", "café", "Body", "", "", "", "", "")
+	decoded, err := base64.URLEncoding.DecodeString(raw)
+	if err != nil {
+		t.Fatalf("decoding raw message: %v", err)
+	}
+	msg := string(decoded)
+	if !strings.Contains(msg, "Subject: =?UTF-8?q?caf=C3=A9?=") {
+		t.Errorf("expected RFC 2047 UTF-8 subject, got:\n%s", msg)
+	}
+}
+
+func TestBuildRawMessageSubjectStripsBOM(t *testing.T) {
+	raw := buildRawMessage("bob@example.com", "\ufeffHello", "Body", "", "", "", "", "")
+	decoded, err := base64.URLEncoding.DecodeString(raw)
+	if err != nil {
+		t.Fatalf("decoding raw message: %v", err)
+	}
+	msg := string(decoded)
+	if !strings.Contains(msg, "Subject: Hello") {
+		t.Errorf("expected BOM stripped from subject, got:\n%s", msg)
+	}
+	if strings.Contains(msg, "Subject: =?UTF-8?q?=EF=BB=BF") {
+		t.Error("subject should not Q-encode a BOM; BOM should be removed")
+	}
+}

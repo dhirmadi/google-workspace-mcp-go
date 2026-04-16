@@ -4,6 +4,9 @@ package auth
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
+	"os"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 
@@ -35,10 +38,25 @@ type StartAuthInput struct {
 	UserEmail string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address to authenticate"`
 }
 
-func createStartAuthHandler(oauthMgr *iauth.OAuthManager) mcp.ToolHandlerFor[StartAuthInput, any] {
-	return func(ctx context.Context, req *mcp.CallToolRequest, input StartAuthInput) (*mcp.CallToolResult, any, error) {
+// StartAuthOutput exposes the authorization URL for MCP clients that surface structuredContent
+// more reliably than plain tool text (some hosts hide long URLs in chat).
+type StartAuthOutput struct {
+	AuthURL   string `json:"auth_url"`
+	UserEmail string `json:"user_google_email"`
+}
+
+func createStartAuthHandler(oauthMgr *iauth.OAuthManager) mcp.ToolHandlerFor[StartAuthInput, StartAuthOutput] {
+	return func(ctx context.Context, req *mcp.CallToolRequest, input StartAuthInput) (*mcp.CallToolResult, StartAuthOutput, error) {
 		// Generate auth URL with user email as state
 		authURL := oauthMgr.GetAuthURL(input.UserEmail)
+
+		// Duplicate on stderr: stdio MCP uses stdout for the protocol; Cursor and similar clients
+		// often show MCP server stderr in logs while hiding tool output in the chat UI.
+		slog.Warn("google oauth authorization URL issued — copy from stderr/MCP logs if the client hides tool text",
+			"user_google_email", input.UserEmail,
+			"auth_url", authURL,
+		)
+		fmt.Fprintf(os.Stderr, "\n[google-workspace-mcp] OAuth URL (open in browser). If your client hides tool results, copy from here or MCP server logs:\n%s\n\n", authURL)
 
 		rb := response.New()
 		rb.Header("Google Authentication")
@@ -48,7 +66,9 @@ func createStartAuthHandler(oauthMgr *iauth.OAuthManager) mcp.ToolHandlerFor[Sta
 		rb.Blank()
 		rb.Line("After granting access, the OAuth callback will automatically capture the authorization code.")
 		rb.Line("Authenticating as: %s", input.UserEmail)
+		rb.Blank()
+		rb.Line("If you do not see a clickable link above, open the MCP server output / stderr for the same URL.")
 
-		return rb.TextResult(), nil, nil
+		return rb.TextResult(), StartAuthOutput{AuthURL: authURL, UserEmail: input.UserEmail}, nil
 	}
 }
