@@ -1,29 +1,92 @@
 # Google Workspace MCP Server (Go)
 
-A [Model Context Protocol](https://modelcontextprotocol.io/) server that gives AI agents full access to Google Workspace — Gmail, Drive, Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Contacts, Search, and Apps Script.
+[![CI](https://github.com/evert/google-workspace-mcp-go/actions/workflows/ci.yml/badge.svg)](https://github.com/evert/google-workspace-mcp-go/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/github/go-mod/go-version/evert/google-workspace-mcp-go?label=Go)](go.mod)
+[![Release](https://img.shields.io/github/v/release/evert/google-workspace-mcp-go?label=release)](https://github.com/evert/google-workspace-mcp-go/releases)
 
-**136 tools. 12 services. One container. ~33 MB image.**
+A **[Model Context Protocol](https://modelcontextprotocol.io/)** server in **Go 1.24** that exposes **Google Workspace** to AI agents: Gmail, Drive, Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Contacts, Programmable Search, and Apps Script. Implements **tools** targeting MCP spec **2025-11-25** (via [`github.com/modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk)).
 
-Documentation index (by role): **[`docs/README.md`](docs/README.md)**.
+| | |
+| :--- | :--- |
+| **Workspace tools** | **136** ([`docs/tools-inventory.md`](docs/tools-inventory.md)) |
+| **Default MCP tools** | **137** (includes `start_google_auth`; OAuth 2.1 mode → **136** — [`docs/auth-and-scopes.md`](docs/auth-and-scopes.md)) |
+| **Image size** | **~33 MB** (multi-stage build, distroless, non-root) |
+| **Doc hub (by role)** | **[`docs/README.md`](docs/README.md)** |
+| **Changelog** | [`CHANGELOG.md`](CHANGELOG.md) |
+| **Security** | [`docs/security.md`](docs/security.md) · [vulnerability reporting](.github/SECURITY.md) |
+
+## Contents
+
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Prebuilt container images](#prebuilt-container-images)
+- [Getting started (detailed)](#getting-started-detailed)
+- [`start.sh` reference](#startsh-reference)
+- [What's included](#whats-included)
+- [Configuration](#configuration)
+- [Authentication](#authentication)
+- [Service-specific notes](#service-specific-notes)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [MCP spec compliance](#mcp-spec-compliance)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## Getting Started
+## Prerequisites
 
-### Step 1: Get Google OAuth Credentials
+- **Docker** (recommended) *or* **Go 1.24+** to build from source
+- A **Google Cloud** project with **OAuth 2.0 Client ID** (type: **Web application**) and **Authorized redirect URIs** matching your server port (default `http://localhost:8000/oauth/callback`)
+- **APIs enabled** in Google Cloud for the products you use (Gmail, Drive, Calendar, and so on)
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Create a new project (or select an existing one)
-3. Go to **APIs & Services > Credentials**
-4. Click **Create Credentials > OAuth 2.0 Client ID**
-5. Choose **Web application** as the application type
-6. Under **Authorized redirect URIs**, add: `http://localhost:8000/oauth/callback`
-   (if you plan to use a different port with `--port`, add that URI too, e.g., `http://localhost:9000/oauth/callback`)
-7. Copy the **Client ID** and **Client Secret**
-8. Go to **APIs & Services > Library** and enable the APIs you need:
-   - Gmail API, Google Drive API, Google Calendar API, etc.
+---
 
-### Step 2: Build the Container
+## Quick start
+
+1. **OAuth client** — [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials): Web client, redirect URI as above, enable needed APIs.
+2. **Run** — from a clone of this repository:
+
+   ```bash
+   ./start.sh "YOUR_CLIENT_ID.apps.googleusercontent.com" "YOUR_CLIENT_SECRET"
+   ```
+
+3. **Connect** — MCP URL **`http://localhost:8000/mcp`** (adjust host/port if needed). Copy **[`docs/cursor-mcp.json.example`](docs/cursor-mcp.json.example)** into **`.cursor/mcp.json`** (or your client’s equivalent).
+
+4. **Authenticate** — first Google tool use triggers OAuth; with legacy mode the agent calls **`start_google_auth`** and you complete consent in the browser.
+
+For **Cursor**: **`.cursor/`** is local-only (not committed); use **`docs/cursor-mcp.json.example`** as the template for **`mcp.json`**.
+
+---
+
+## Prebuilt container images
+
+Tagged releases build **multi-arch** images (**`linux/amd64`**, **`linux/arm64`**) and push to **GitHub Container Registry** via [`.github/workflows/publish.yml`](.github/workflows/publish.yml).
+
+Replace **`OWNER/REPO`** with your GitHub **`owner/repo`** (for this module’s home, **`evert/google-workspace-mcp-go`**):
+
+```bash
+docker pull ghcr.io/OWNER/REPO:v1.3.0
+```
+
+Tags typically include the **semver** (`v1.3.0`), **major.minor** (`1.3`), **major** (`1`), and a **git SHA**. See [**Releases**](https://github.com/evert/google-workspace-mcp-go/releases) for the current version.
+
+The [`Dockerfile`](Dockerfile) defaults **`MCP_TRANSPORT=streamable-http`** and **`MCP_PORT=8000`**, which matches HTTP-based MCP clients (Cursor, Claude Desktop) using **`http://…/mcp`**.
+
+---
+
+## Getting started (detailed)
+
+### Step 1: Get Google OAuth credentials
+
+1. Open [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials).
+2. Create or select a project.
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID → Web application**.
+4. Under **Authorized redirect URIs**, add **`http://localhost:8000/oauth/callback`** (and the same host with another port if you use `--port`).
+5. Copy **Client ID** and **Client Secret**.
+6. **APIs & Services → Library** — enable each API you need (Gmail, Drive, Calendar, …).
+
+### Step 2: Build the container (optional if using `start.sh` alone)
 
 ```bash
 git clone https://github.com/evert/google-workspace-mcp-go.git
@@ -31,33 +94,19 @@ cd google-workspace-mcp-go
 docker build -t google-workspace-mcp .
 ```
 
-That's it. The image is ~33 MB (distroless, non-root).
+Image is ~33 MB (distroless, non-root).
 
-### Step 3: Start the Server
-
-Use the `start.sh` script:
+### Step 3: Start the server
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID.apps.googleusercontent.com" "YOUR_CLIENT_SECRET"
 ```
 
-The server starts on `http://localhost:8000/mcp` with all 136 tools enabled.
+Default: **HTTP** MCP at **`http://localhost:8000/mcp`**, **137** MCP tools (136 Workspace + `start_google_auth`).
 
-### Step 4: Connect Your MCP Client
+### Step 4: Connect your MCP client
 
-For **Cursor**, create **`.cursor/mcp.json`** in your project (or merge into your user MCP config). Copy from **`docs/cursor-mcp.json.example`** and adjust the URL if you use a non-default port:
-
-```json
-{
-  "mcpServers": {
-    "google-workspace": {
-      "url": "http://localhost:8000/mcp"
-    }
-  }
-}
-```
-
-Or for **Claude Desktop** (`claude_desktop_config.json`):
+**Cursor** — **`.cursor/mcp.json`** (project or user config):
 
 ```json
 {
@@ -69,126 +118,112 @@ Or for **Claude Desktop** (`claude_desktop_config.json`):
 }
 ```
 
-> If you used `--port 9000`, change the URL to `http://localhost:9000/mcp`.
+**Claude Desktop** — `claude_desktop_config.json` with the same `url` shape.
+
+> If you use **`--port 9000`**, set the URL to **`http://localhost:9000/mcp`** and add the matching redirect URI in Google Cloud Console.
 
 ### Step 5: Authenticate
 
-The first time you (or the AI agent) use a Google tool, you'll be prompted to authenticate. The agent calls `start_google_auth` with your email, and you open the returned URL in your browser. After granting access, you're all set — tokens are stored and auto-refresh transparently.
-
-### Cursor (this repository)
-
-**`.cursor/` is not committed to git** (local-only). Add your own rules, slash commands, and subagents under `.cursor/` if you use Cursor; use **`docs/cursor-mcp.json.example`** as the starting point for **`mcp.json`**. Adjust the MCP URL if you use a non-default port.
+On first use of a Google tool, complete OAuth (legacy flow: agent calls **`start_google_auth`** with your email, you open the URL, grant access). Tokens refresh automatically when persisted.
 
 ---
 
-## start.sh Reference
+## `start.sh` reference
 
 ```bash
 ./start.sh <CLIENT_ID> <CLIENT_SECRET> [OPTIONS]
 ```
 
-The two required arguments are your Google OAuth Client ID and Client Secret. Everything else is optional.
+`CLIENT_ID` and `CLIENT_SECRET` are required; everything else is optional.
 
-### What Happens with No Options
+### Default behavior (no extra flags)
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID.apps.googleusercontent.com" "YOUR_SECRET"
 ```
 
-This starts the server with:
+- **All 12 services** — **137** MCP tools by default (**136** Workspace tools per [`docs/tools-inventory.md`](docs/tools-inventory.md) plus **`start_google_auth`**; OAuth 2.1 omits the auth tool → **136** — [`docs/auth-and-scopes.md`](docs/auth-and-scopes.md))
+- **Port `8000`** — MCP **`http://localhost:8000/mcp`**, OAuth callback **`http://localhost:8000/oauth/callback`**
+- **In-memory auth** unless **`--persistent-auth`** (tokens lost on container restart)
+- **Auto-restart** container on failure (when managed by `start.sh` / Docker as documented)
 
-- **All 12 services enabled** — **137** MCP tools by default (**136** Google Workspace tools per [`docs/tools-inventory.md`](docs/tools-inventory.md) plus `start_google_auth`; OAuth 2.1 mode omits the auth tool → **136** — see [`docs/auth-and-scopes.md`](docs/auth-and-scopes.md))
-- **Port 8000** — MCP endpoint at `http://localhost:8000/mcp`
-- **OAuth callback** at `http://localhost:8000/oauth/callback`
-- **In-memory auth** — tokens are stored in memory only (lost on restart). Use `--persistent-auth` to persist tokens to a Docker volume.
-- **Container auto-restarts** if it crashes or Docker Desktop restarts
-
-The image is built automatically on first run. Subsequent runs reuse the cached image.
+The image is built on first run if missing; later runs reuse the cached image.
 
 ### Options
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--services SVCS` | all 12 services | Comma-separated list of services to enable |
-| `--port PORT` | `8000` | HTTP port to expose (OAuth callback adjusts automatically) |
-| `--persistent-auth` | off | Persist OAuth tokens to a Docker volume (survives restarts) |
-| `--email EMAIL` | — | Your Google email for authentication |
-| `--cse-id ID` | — | Google Custom Search Engine ID |
-| `--log-level LEVEL` | `info` | `debug`, `info`, `warn`, or `error` |
-| `--rebuild` | — | Force rebuild the Docker image |
-| `--stop` | — | Stop and remove the running container |
+| `--services SVCS` | all 12 services | Comma-separated: `gmail`, `drive`, `calendar`, … |
+| `--port PORT` | `8000` | HTTP port (OAuth callback follows this port) |
+| `--persistent-auth` | off | Persist OAuth tokens in a Docker volume |
+| `--email EMAIL` | — | Default Google account (single-user convenience) |
+| `--cse-id ID` | — | Programmable Search Engine ID |
+| `--log-level LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
+| `--rebuild` | — | Force image rebuild |
+| `--stop` | — | Stop and remove the container (volume preserved) |
 
 ### Examples
 
-**All services on default port** — the simplest way to get everything running:
+**All services, default port**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID.apps.googleusercontent.com" "GOCSPX-yourSecret"
-# → 137 MCP tools (136 Workspace + start_google_auth) on http://localhost:8000/mcp
+# → 137 MCP tools on http://localhost:8000/mcp
 ```
 
-**Only Gmail, Drive, and Calendar** — fewer tools means less noise for the AI agent:
+**Subset: Gmail, Drive, Calendar**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --services gmail,drive,calendar
-# → 38 tools (15 Gmail + 16 Drive + 6 Calendar + 1 auth)
-# → Only requests OAuth scopes for those 3 services
+# → 38 tools (15 Gmail + 16 Drive + 6 Calendar + 1 auth); OAuth scopes limited to those services
 ```
 
-**Just Gmail for email automation:**
+**Gmail only + default email**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --services gmail --email user@company.com
 # → 16 tools (15 Gmail + 1 auth)
-# → Single-user mode: no need to pass email in every tool call
 ```
 
-**Productivity suite** — Gmail, Calendar, Docs, and Sheets:
+**Gmail, Calendar, Docs, Sheets**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --services gmail,calendar,docs,sheets
-# → 55 tools for everyday office work
 ```
 
-**Run on a different port** — useful if port 8000 is taken:
+**Different port**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --port 9000
-# → MCP endpoint at http://localhost:9000/mcp
-# → OAuth callback automatically adjusts to http://localhost:9000/oauth/callback
-# → Remember to add http://localhost:9000/oauth/callback to your
-#   Google Cloud Console redirect URIs
+# Add http://localhost:9000/oauth/callback to the OAuth client redirect URIs
 ```
 
-**Persistent authentication** — tokens survive container restarts:
+**Persistent tokens**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --persistent-auth
-# → Tokens stored in Docker volume 'mcp-credentials'
-# → Users don't need to re-authenticate after restarts
 ```
 
-**Debug logging** — see every request and response in the container logs:
+**Debug logs**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --log-level debug
-# Then: docker logs -f google-workspace-mcp
+# docker logs -f google-workspace-mcp
 ```
 
-**Force rebuild** — after pulling new code or if the image seems stale:
+**Rebuild image**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" --rebuild
 ```
 
-**Stop the server:**
+**Stop**
 
 ```bash
 ./start.sh --stop
-# Stops and removes the container. Credentials volume is preserved.
 ```
 
-**Combine options:**
+**Combine flags**
 
 ```bash
 ./start.sh "YOUR_CLIENT_ID" "YOUR_SECRET" \
@@ -198,10 +233,10 @@ The image is built automatically on first run. Subsequent runs reuse the cached 
   --log-level debug
 ```
 
-### Available Services
+### Available services (`--services`)
 
-| Service | Flag value | Tools |
-|---------|-----------|-------|
+| Service | Flag | Tools |
+|---------|------|-------|
 | Gmail | `gmail` | 15 |
 | Google Drive | `drive` | 16 |
 | Google Calendar | `calendar` | 6 |
@@ -212,63 +247,67 @@ The image is built automatically on first run. Subsequent runs reuse the cached 
 | Google Slides | `slides` | 9 |
 | Google Tasks | `tasks` | 12 |
 | Google Contacts | `contacts` | 15 |
-| Custom Search | `search` | 3 |
+| Programmable Search | `search` | 3 |
 | Apps Script | `appscript` | 17 |
 
-> **Tip**: When you limit services with `--services`, the server only requests OAuth scopes for those services. This means users grant fewer permissions during authentication.
+Limiting **`--services`** reduces both **tool surface** and **OAuth scope** requests at consent time.
 
 ---
 
-## What's Included
+## What's included
 
-### Services & Tools
+### Services and tools
 
-| Service | Tools | What you can do |
-|---------|-------|-----------------|
-| **Gmail** | 15 | Search, read, send, draft, labels, filters, attachments, batch ops |
-| **Drive** | 16 | Search, read, create, upload, share, permissions, batch share |
-| **Calendar** | 6 | List calendars, events, create/modify/delete events, freebusy |
-| **Docs** | 19 | Read/create/edit documents, tables, images, comments, find & replace, PDF export |
-| **Sheets** | 14 | Create/read/modify spreadsheets, formatting, conditional formatting, comments |
-| **Chat** | 4 | List spaces, read/search/send messages |
-| **Forms** | 6 | Create forms, read responses, conditional formatting |
-| **Slides** | 9 | Create/read presentations, pages, thumbnails, comments |
-| **Tasks** | 12 | Full CRUD on tasks and task lists, move, clear completed |
-| **Contacts** | 15 | Search/CRUD contacts and groups, batch create/update/delete |
-| **Search** | 3 | Google Custom Search Engine queries |
-| **Apps Script** | 17 | Manage projects, deployments, versions, run functions, view metrics |
-| **Total** | **136** | + 1 auth tool = **137** |
+| Service | Tools | Capabilities (summary) |
+|---------|-------|-------------------------|
+| **Gmail** | 15 | Search, read, send, drafts, labels, filters, attachments, batch |
+| **Drive** | 16 | Search, read, create, share, permissions, batch |
+| **Calendar** | 6 | Calendars, events, create/update/delete, free/busy |
+| **Docs** | 19 | Read/write, tables, images, comments, find/replace, PDF export |
+| **Sheets** | 14 | Read/write, formatting, conditional formatting, comments |
+| **Chat** | 4 | Spaces, read/search/send |
+| **Forms** | 6 | Forms, responses, layout |
+| **Slides** | 9 | Decks, pages, thumbnails, comments |
+| **Tasks** | 12 | Tasks and lists, move, clear completed |
+| **Contacts** | 15 | People API, groups, batch |
+| **Search** | 3 | Custom Search Engine queries |
+| **Apps Script** | 17 | Projects, deployments, versions, execute, metrics |
+| **Total** | **136** | **+1** auth tool **`start_google_auth`** = **137** MCP tools (default legacy OAuth) |
 
-### Tool Annotations
+### Tool annotations
 
-Every tool has MCP annotations that tell AI agents what the tool does:
+Every tool declares MCP **annotations** so clients can reason about safety and retries:
 
-- **ReadOnlyHint** — safe to call, no side effects (e.g., `search_gmail_messages`)
-- **DestructiveHint** — irreversible action (e.g., `delete_event`, `delete_contact`)
-- **IdempotentHint** — safe to retry (e.g., `modify_event`, `update_task`)
-- **OpenWorldHint** — interacts with external systems (all tools)
+- **ReadOnlyHint** — no writes (e.g. `search_gmail_messages`)
+- **DestructiveHint** — irreversible (e.g. `delete_event`)
+- **IdempotentHint** — safe to retry (e.g. `modify_event`)
+- **OpenWorldHint** — external side effects (essentially all integration tools)
 
 ---
 
-## Configuration Reference
+## Configuration
 
-### Environment Variables
+### Environment variables (common)
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GOOGLE_OAUTH_CLIENT_ID` | **Yes** | — | OAuth 2.0 client ID |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | **Yes** | — | OAuth 2.0 client secret |
-| `ENABLED_SERVICES` | No | all | Comma-separated services to enable |
-| `MCP_TRANSPORT` | No | `stdio` | Transport: `stdio` or `streamable-http` |
-| `MCP_PORT` | No | `8000` | HTTP server port |
-| `WORKSPACE_MCP_HOST` | No | `0.0.0.0` | HTTP bind address |
-| `WORKSPACE_MCP_BASE_URI` | No | `http://localhost` | Base URI for OAuth callbacks |
-| `WORKSPACE_MCP_PERSISTENT_AUTH` | No | `false` | Persist OAuth tokens to disk (survives restarts) |
-| `WORKSPACE_MCP_CREDENTIALS_DIR` | No | `~/.google_workspace_mcp/credentials` | Token storage directory (only used with persistent auth) |
-| `WORKSPACE_MCP_READ_ONLY` | No | `false` | Read-only mode (only read scopes) |
-| `TOOL_TIER` | No | `complete` | Tool tier: `core`, `extended`, or `complete` |
-| `GOOGLE_CSE_ID` | No | — | Custom Search Engine ID |
+| `ENABLED_SERVICES` | No | all | Comma-separated service list (same names as `--services`) |
+| `MCP_TRANSPORT` | No | `stdio` * | Transport: `stdio` or `streamable-http` (*`Dockerfile` defaults to `streamable-http`*) |
+| `MCP_PORT` / `PORT` | No | `8000` | HTTP port |
+| `WORKSPACE_MCP_HOST` | No | `0.0.0.0` | Bind address |
+| `WORKSPACE_MCP_BASE_URI` | No | `http://localhost` | Base URL for OAuth callback construction |
+| `WORKSPACE_MCP_PERSISTENT_AUTH` | No | `false` | Persist tokens under `WORKSPACE_MCP_CREDENTIALS_DIR` |
+| `WORKSPACE_MCP_CREDENTIALS_DIR` | No | `~/.google_workspace_mcp/credentials` | Token directory (with persistent auth) |
+| `WORKSPACE_MCP_READ_ONLY` | No | `false` | Read-only scopes; write tools filtered out |
+| `TOOL_TIER` | No | `complete` | `core`, `extended`, or `complete` (cumulative) |
+| `GOOGLE_CSE_ID` | No | — | Required for Search tools |
 | `LOG_LEVEL` | No | `info` | `debug`, `info`, `warn`, `error` |
+| `MCP_SINGLE_USER_MODE` | No | `false` | Single-user session behavior (see `docker-compose.yml` / `.env.example`) |
+| `MCP_ENABLE_OAUTH21` | No | `false` | OAuth 2.1 / client-mediated auth ([`docs/auth-and-scopes.md`](docs/auth-and-scopes.md)) |
+
+Full tables (including stateless mode): **[`docs/configuration.md`](docs/configuration.md)**.
 
 ### Docker Compose
 
@@ -278,118 +317,130 @@ cp .env.example .env
 docker compose up --build
 ```
 
-To enable persistent auth in Docker Compose, add `WORKSPACE_MCP_PERSISTENT_AUTH=true` and mount a volume for `/data/credentials`. See `docker-compose.yml` for the full configuration.
+For persistent auth, set **`WORKSPACE_MCP_PERSISTENT_AUTH=true`** and mount **`/data/credentials`** as in [`docker-compose.yml`](docker-compose.yml).
 
 ---
 
-## How Authentication Works
+## Authentication
 
-```
-1. AI agent calls start_google_auth with the user's email
-2. Server returns a Google OAuth consent URL
-3. User opens the URL in their browser and grants access
+```text
+1. Agent calls start_google_auth with the user's email (legacy OAuth)
+2. Server returns Google consent URL
+3. User completes consent in the browser
 4. Google redirects to http://localhost:<port>/oauth/callback
-5. Server exchanges the code for a token and stores it
-6. All subsequent tool calls use the stored token (auto-refreshes)
+5. Server stores tokens (and refreshes them automatically)
+6. Subsequent tool calls use the stored session
 ```
 
-The OAuth callback URL is built from the port you pass to `start.sh`. If you use `--port 9000`, the callback goes to `http://localhost:9000/oauth/callback`. Make sure the redirect URI in your [Google Cloud Console](https://console.cloud.google.com/apis/credentials) matches the port you're using.
+Match **redirect URIs** in Google Cloud Console to **`WORKSPACE_MCP_BASE_URI`** and **`MCP_PORT`** (or `start.sh --port`).
 
-By default, tokens are stored **in memory only** and lost on restart. With `--persistent-auth`, tokens are stored per-user at `/data/credentials/` (in Docker) or `~/.google_workspace_mcp/credentials/` (local). Token files have `0600` permissions. The credentials directory has `0700` permissions. In Docker, a named volume (`mcp-credentials`) is mounted automatically to persist tokens across restarts.
+**Persistence:** without **`--persistent-auth`** / **`WORKSPACE_MCP_PERSISTENT_AUTH`**, tokens live **in memory** and are lost on restart. With persistence, files are **`0600`**, directory **`0700`**.
 
-Persisted tokens are **plain JSON on disk** in v1 (same broad risk class as typical local OAuth token files). Encryption or OS keyring integration is tracked as a future hardening step in [`docs/security.md`](docs/security.md).
+**At-rest format:** persisted tokens are **plain JSON** in v1; see **[`docs/security.md`](docs/security.md)** for threat model and future encryption/keyring notes.
 
 ---
 
-## Service-Specific Notes
+## Service-specific notes
 
 ### Google Chat
 
-Requires a Google Workspace account. The Chat API does **not** work with consumer Gmail accounts. The app must be configured as a Chat app in the Workspace Admin Console.
+Requires **Google Workspace** (not consumer Gmail alone). The Chat app may need configuration in the **Workspace Admin** console.
 
-### Custom Search
+### Programmable Search
 
-Requires a Custom Search Engine ID (`GOOGLE_CSE_ID`), created at [programmablesearchengine.google.com](https://programmablesearchengine.google.com). Pass it with `--cse-id` or the `GOOGLE_CSE_ID` env var.
+Requires **`GOOGLE_CSE_ID`** from [Programmable Search Engine](https://programmablesearchengine.google.com).
 
 ### Apps Script
 
-`run_script_function` only works with scripts deployed as an **API executable**. The user must have **edit access** to the script project. Rate limit: ~30 calls/min.
+**`run_script_function`** requires deployment as an **API executable** and **edit** access to the project (~30 calls/min typical quota behavior).
 
 ### Contacts
 
-Uses the Google People API. The legacy Contacts API is deprecated. Tool names use "contacts" for clarity.
+Uses the **Google People API** (legacy Contacts API is deprecated). Tool names say **contacts** for clarity.
+
+---
+
+## Troubleshooting
+
+| Symptom | What to check |
+|--------|----------------|
+| **MCP client cannot connect** | Server running; URL **`http://HOST:PORT/mcp`**; firewall; same transport (**`streamable-http`** for HTTP clients). |
+| **OAuth redirect mismatch** | Redirect URI in Google Cloud **exactly** matches **`http://localhost:<port>/oauth/callback`** (scheme, host, port, path). |
+| **“No tools” / empty tool list** | **`ENABLED_SERVICES`** / **`--services`** not overly narrow; **`TOOL_TIER`** not `core` unless intended. |
+| **Search tools fail** | **`GOOGLE_CSE_ID`** / **`--cse-id`** set. |
+| **Chat always errors** | Workspace account and Chat API / app configuration. |
+| **429 / rate limit** | Back off; see Google quotas; batch tools may emit progress ([`docs/architecture.md`](docs/architecture.md)). |
+
+Agent-facing errors are mapped to actionable messages in middleware — see **`internal/middleware/errors.go`** and **[`docs/architecture.md`](docs/architecture.md)**.
 
 ---
 
 ## Development
 
-### Build from Source
+### Build from source
 
 ```bash
 go build -o server ./cmd/server
 
-# Run locally in stdio mode
 export GOOGLE_OAUTH_CLIENT_ID="your-client-id"
 export GOOGLE_OAUTH_CLIENT_SECRET="your-secret"
-./server
 
-# Run locally in HTTP mode
-./server --transport streamable-http
+./server                              # stdio (default from env)
+./server --transport streamable-http  # HTTP MCP
 ```
 
-### Run Tests
+### Tests and lint
 
 ```bash
-# Unit tests
 go test ./...
-
-# Integration tests (verifies all 136 tools register correctly)
+go test -race ./...
 GOOGLE_OAUTH_CLIENT_ID=test GOOGLE_OAUTH_CLIENT_SECRET=test \
   go test -tags=integration ./internal/integration/
-
-# Race detection
-go test -race ./...
+golangci-lint run ./...
 ```
 
-### Lint
+Architecture, registry behavior, and patterns: **[`docs/architecture.md`](docs/architecture.md)**, **[`docs/code-patterns.md`](docs/code-patterns.md)**.
 
-```bash
-golangci-lint run
-```
+### Project structure
 
-### Project Structure
-
-```
-cmd/server/main.go              Entry point, signal handling, transport routing
+```text
+cmd/server/main.go           Entry point, transports, wiring
 internal/
-  auth/                         OAuth2 flow, token storage, callback handler, scopes
-  config/                       Env var + CLI flag loading, tier config
-  registry/registry.go          Tool registration with service/tier/mode filtering
-  services/factory.go           Google API client factory (12 APIs, per-user caching)
-  tools/                        One package per Google Workspace service
-    gmail/  drive/  calendar/   ... (handlers, helpers, registration)
-    comments/                   Shared comment tools for Docs/Sheets/Slides
-  middleware/                   SDK middleware (logging, error translation, retry)
-  pkg/                          Shared utilities (response builder, HTML-to-text, Office extraction)
-configs/tool_tiers.yaml         Tier assignments for all 136 tools
+  auth/                      OAuth2, scopes, callback, token persistence
+  config/                    Env, flags, tier YAML
+  registry/registry.go       Tool registration, tier/service/read-only filters
+  services/factory.go        Google API client factory
+  tools/<service>/           Per-product tools + handlers
+  comments/                  Shared Drive-backed comments (Docs/Sheets/Slides)
+  middleware/                Logging, Google error mapping, retry
+  pkg/                       Response builder, HTML/Office helpers
+configs/tool_tiers.yaml      Tier assignments
 ```
 
 ---
 
-## MCP Spec Compliance
+## MCP spec compliance
 
-Targeting MCP spec **2025-11-25**:
+Targeting **MCP 2025-11-25**:
 
 | Feature | Status |
 |---------|--------|
-| Tools (136 + auth) | Implemented |
-| Tool Annotations | Implemented |
-| Structured Output | Implemented |
-| Progress Notifications | Implemented (batch tools) |
-| Tool Icons | Implemented (per-service) |
-| SDK Middleware | Implemented |
-| Resources / Prompts | Deferred to v2 |
+| Tools (Workspace + optional auth tool) | Implemented |
+| Tool annotations | Implemented |
+| Structured output (dual text + typed where applicable) | Implemented |
+| Progress notifications | Implemented (batch / long-running tools) |
+| Tool icons (per service) | Implemented |
+| SDK middleware | Implemented |
+| Resources / Prompts | Deferred (see [`docs/architecture.md`](docs/architecture.md)) |
+
+---
+
+## Contributing
+
+Use **[`docs/code-patterns.md`](docs/code-patterns.md)** for tool handlers and output conventions. Before opening a PR, run **`golangci-lint run ./...`** and **`go test -race ./...`** (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)). Use [`.github/pull_request_template.md`](.github/pull_request_template.md) when filing changes.
+
+---
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See the **`LICENSE`** file in the repository root when your checkout includes it.
