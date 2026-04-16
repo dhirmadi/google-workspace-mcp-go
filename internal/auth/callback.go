@@ -12,6 +12,9 @@ type ClientInvalidator interface {
 	InvalidateClient(userEmail string)
 }
 
+// Seconds before the OAuth success page attempts window.close() (browsers may block auto-close).
+const oauthSuccessAutoCloseSeconds = 30
+
 // OAuthCallbackHandler returns an http.HandlerFunc that handles the OAuth 2.0 callback.
 // It exchanges the authorization code for a token and persists it.
 // The state parameter carries the user's email address.
@@ -82,6 +85,7 @@ func OAuthCallbackHandler(oauthMgr *OAuthManager, invalidator ClientInvalidator)
 }
 
 func renderSuccessPage(email string) string {
+	safeEmail := html.EscapeString(email)
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -150,8 +154,30 @@ func renderSuccessPage(email string) string {
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
+    .countdown-wrap {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #444;
+    }
+    .countdown-msg {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 8px;
+    }
+    .countdown {
+      font-size: 42px;
+      font-weight: 700;
+      color: #4caf50;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+    .countdown-unit {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
     .close-hint {
-      margin-top: 24px;
+      margin-top: 16px;
       font-size: 13px;
       color: #666;
     }
@@ -169,10 +195,39 @@ func renderSuccessPage(email string) string {
       All MCP tools are now available for this account.
     </p>
     <span class="badge">Google Workspace MCP</span>
-    <p class="close-hint">You can close this window.</p>
+    <div class="countdown-wrap">
+      <p class="countdown-msg" id="countdown-msg">This window will close automatically in</p>
+      <div class="countdown" id="countdown">%[2]d</div>
+      <p class="countdown-unit">seconds</p>
+      <p class="close-hint" id="close-fallback"></p>
+    </div>
   </div>
+  <script>
+    (function () {
+      var total = %[2]d;
+      var remaining = total;
+      var el = document.getElementById("countdown");
+      var msg = document.getElementById("countdown-msg");
+      var fallback = document.getElementById("close-fallback");
+      function tick() {
+        if (el) el.textContent = String(remaining);
+        if (remaining <= 0) {
+          if (msg) msg.textContent = "Closing…";
+          window.close();
+          if (fallback) {
+            fallback.textContent =
+              "This tab could not be closed automatically (browser security). You may close it yourself.";
+          }
+          return;
+        }
+        remaining--;
+        setTimeout(tick, 1000);
+      }
+      tick();
+    })();
+  </script>
 </body>
-</html>`, email)
+</html>`, safeEmail, oauthSuccessAutoCloseSeconds)
 }
 
 func renderErrorPage(errMsg string) string {

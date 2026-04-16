@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/oauth2"
 	"google.golang.org/api/googleapi"
 )
 
@@ -13,6 +14,15 @@ import (
 func HandleGoogleAPIError(err error) error {
 	if err == nil {
 		return nil
+	}
+
+	var retrieveErr *oauth2.RetrieveError
+	if errors.As(err, &retrieveErr) {
+		return fmt.Errorf(
+			"google oauth token error — refresh or consent may be invalid (%s). "+
+				"Call start_google_auth for this user; if the client hides the link, copy the URL from this MCP server's stderr / MCP logs output",
+			retrieveErr.Error(),
+		)
 	}
 
 	var googleErr *googleapi.Error
@@ -25,7 +35,7 @@ func HandleGoogleAPIError(err error) error {
 		case 401:
 			return fmt.Errorf(
 				"authentication expired for this user — call start_google_auth tool to re-authenticate, " +
-					"or verify the OAuth configuration is correct")
+					"or verify the OAuth configuration is correct. If the host hides tool text, use the OAuth URL printed to this server's stderr / MCP logs")
 		case 403:
 			msg := googleErr.Message
 			lower := strings.ToLower(msg)

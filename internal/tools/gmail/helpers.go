@@ -197,33 +197,58 @@ func messageToDetail(msg *gmail.Message) MessageDetail {
 	}
 }
 
+// sanitizeOneLineHeaderValue strips a UTF-8 BOM and removes CR/LF/NUL so header
+// values cannot break RFC 5322 structure (which would garble the Subject line).
+func sanitizeOneLineHeaderValue(s string) string {
+	s = strings.TrimPrefix(s, "\ufeff")
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return s
+	}
+	var b strings.Builder
+	b.Grow(len(s))
+	for _, r := range s {
+		switch r {
+		case '\r', '\n', 0:
+			b.WriteByte(' ')
+		default:
+			b.WriteRune(r)
+		}
+	}
+	return strings.TrimSpace(b.String())
+}
+
+// formatSubjectHeader encodes the Subject for RFC 5322 + RFC 2047. Raw UTF-8 in
+// Subject (or a BOM pasted from documents) is a common cause of mojibake or
+// leading garbage in mail clients.
+func formatSubjectHeader(subject string) string {
+	return mime.QEncoding.Encode("UTF-8", sanitizeOneLineHeaderValue(subject))
+}
+
 // buildRawMessage constructs an RFC 2822 message and returns it as a
 // base64url-encoded string suitable for the Gmail API's raw field.
 //
 // Encoding details:
-//   - Subject is RFC 2047 Q-encoded so non-ASCII characters survive transit.
+//   - Subject is RFC 2047 Q-encoded (after BOM/control sanitization).
 //   - Body is declared Content-Transfer-Encoding: 8bit with charset UTF-8,
 //     which tells receiving MTAs to expect raw UTF-8 octets.
 func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references string) string {
 	var msg strings.Builder
 
-	// RFC 2047 Q-encoding for headers that may contain non-ASCII characters.
-	enc := mime.QEncoding
-
-	msg.WriteString(fmt.Sprintf("To: %s\r\n", to))
+	msg.WriteString(fmt.Sprintf("To: %s\r\n", sanitizeOneLineHeaderValue(to)))
 	if cc != "" {
-		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", cc))
+		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", sanitizeOneLineHeaderValue(cc)))
 	}
 	if bcc != "" {
-		msg.WriteString(fmt.Sprintf("Bcc: %s\r\n", bcc))
+		msg.WriteString(fmt.Sprintf("Bcc: %s\r\n", sanitizeOneLineHeaderValue(bcc)))
 	}
-	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", enc.Encode("UTF-8", subject)))
+	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", formatSubjectHeader(subject)))
 
 	if inReplyTo != "" {
-		msg.WriteString(fmt.Sprintf("In-Reply-To: %s\r\n", inReplyTo))
+		msg.WriteString(fmt.Sprintf("In-Reply-To: %s\r\n", sanitizeOneLineHeaderValue(inReplyTo)))
 	}
 	if references != "" {
-		msg.WriteString(fmt.Sprintf("References: %s\r\n", references))
+		msg.WriteString(fmt.Sprintf("References: %s\r\n", sanitizeOneLineHeaderValue(references)))
 	}
 
 	msg.WriteString("MIME-Version: 1.0\r\n")
