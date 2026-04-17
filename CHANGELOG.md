@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-04-17
+
 ### Changed
 
 - **README**: Restructured for 2026-style operator documentation — badges (CI, Go, release), role-oriented tables, TOC, prerequisites, GHCR pull instructions, expanded env reference with links to `docs/configuration.md`, troubleshooting table, contributing strip, clearer MCP transport defaults and spec compliance summary.
+
+### Container images
+
+Pushing git tag **`v1.4.0`** triggers [`.github/workflows/publish.yml`](.github/workflows/publish.yml), which builds and pushes **multi-arch** (`linux/amd64`, `linux/arm64`) images to **GitHub Container Registry** (`ghcr.io`) with semver tags (for example `v1.4.0`, `1.4`, `1`).
 
 ## [1.3.0] — 2026-04-16
 
