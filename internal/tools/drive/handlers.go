@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/googleapi"
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/office"
@@ -247,11 +249,12 @@ func createGetDownloadURLHandler(factory *services.Factory) mcp.ToolHandlerFor[G
 // --- create_drive_file ---
 
 type CreateFileInput struct {
-	UserEmail string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	FileName  string `json:"file_name" jsonschema:"required" jsonschema_description:"Name for the new file"`
-	Content   string `json:"content,omitempty" jsonschema_description:"Text content to write to the file"`
-	FolderID  string `json:"folder_id,omitempty" jsonschema_description:"ID of the parent folder (default: root)"`
-	MimeType  string `json:"mime_type,omitempty" jsonschema_description:"MIME type of the file (default: text/plain)"`
+	UserEmail     string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	FileName      string `json:"file_name" jsonschema:"required" jsonschema_description:"Name for the new file"`
+	Content       string `json:"content,omitempty" jsonschema_description:"Text content to write to the file (mutually exclusive with content_base64)"`
+	ContentBase64 string `json:"content_base64,omitempty" jsonschema_description:"Base64-encoded file bytes (standard or URL-safe). For PDF, Office, images, etc. Cannot be combined with content. Max decoded size 50 MiB. Set mime_type or use a file_name with a known extension (e.g. .pdf, .docx)."`
+	FolderID      string `json:"folder_id,omitempty" jsonschema_description:"ID of the parent folder (default: root)"`
+	MimeType      string `json:"mime_type,omitempty" jsonschema_description:"MIME type of the file (default: text/plain for text uploads; required for binary if file_name has no known extension)"`
 }
 
 func createCreateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[CreateFileInput, any] {
@@ -261,27 +264,55 @@ func createCreateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[Creat
 			return nil, nil, middleware.HandleGoogleAPIError(err)
 		}
 
-		if input.MimeType == "" {
-			input.MimeType = "text/plain"
+		hasText := input.Content != ""
+		hasB64 := driveBase64PayloadNonEmpty(input.ContentBase64)
+		if hasText && hasB64 {
+			return nil, nil, fmt.Errorf("provide only one of content or content_base64, not both")
+		}
+
+		var decoded []byte
+		if hasB64 {
+			decoded, err = decodeDriveContentBase64(input.ContentBase64, office.MaxFileSize)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
+
+		mimeType := strings.TrimSpace(input.MimeType)
+		if hasB64 {
+			mimeType = resolveDriveUploadMimeType(mimeType, input.FileName)
+			if mimeType == "" {
+				return nil, nil, fmt.Errorf("binary upload requires mime_type or a file_name with a known extension (e.g. .pdf, .docx)")
+			}
+		} else if mimeType == "" {
+			mimeType = "text/plain"
 		}
 
 		fileMetadata := &drive.File{
 			Name:     input.FileName,
-			MimeType: input.MimeType,
+			MimeType: mimeType,
 		}
 		if input.FolderID != "" {
 			fileMetadata.Parents = []string{input.FolderID}
 		}
 
 		var created *drive.File
-		if input.Content != "" {
+		switch {
+		case hasB64:
+			created, err = srv.Files.Create(fileMetadata).
+				Media(bytes.NewReader(decoded), googleapi.ContentType(mimeType)).
+				Fields("id, name, mimeType, webViewLink").
+				SupportsAllDrives(true).
+				Context(ctx).
+				Do()
+		case hasText:
 			created, err = srv.Files.Create(fileMetadata).
 				Media(strings.NewReader(input.Content)).
 				Fields("id, name, mimeType, webViewLink").
 				SupportsAllDrives(true).
 				Context(ctx).
 				Do()
-		} else {
+		default:
 			created, err = srv.Files.Create(fileMetadata).
 				Fields("id, name, mimeType, webViewLink").
 				SupportsAllDrives(true).
