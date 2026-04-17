@@ -1,14 +1,17 @@
 package drive
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/googleapi"
 
 	"github.com/evert/google-workspace-mcp-go/internal/middleware"
+	"github.com/evert/google-workspace-mcp-go/internal/pkg/office"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/response"
 	"github.com/evert/google-workspace-mcp-go/internal/pkg/validate"
 	"github.com/evert/google-workspace-mcp-go/internal/services"
@@ -136,11 +139,13 @@ func createCopyFileHandler(factory *services.Factory) mcp.ToolHandlerFor[CopyFil
 // --- update_drive_file (extended) ---
 
 type UpdateFileInput struct {
-	UserEmail    string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
-	FileID       string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to update"`
-	Name         string `json:"name,omitempty" jsonschema_description:"New file name"`
-	Content      string `json:"content,omitempty" jsonschema_description:"New text content (replaces file content)"`
-	MoveToFolder string `json:"move_to_folder,omitempty" jsonschema_description:"Folder ID to move file to"`
+	UserEmail     string `json:"user_google_email" jsonschema:"required" jsonschema_description:"The user's Google email address"`
+	FileID        string `json:"file_id" jsonschema:"required" jsonschema_description:"The file ID to update"`
+	Name          string `json:"name,omitempty" jsonschema_description:"New file name"`
+	Content       string `json:"content,omitempty" jsonschema_description:"New text content (replaces file content; mutually exclusive with content_base64)"`
+	ContentBase64 string `json:"content_base64,omitempty" jsonschema_description:"Base64-encoded bytes replacing file content (standard or URL-safe). Cannot be combined with content. Max decoded size 50 MiB."`
+	MimeType      string `json:"mime_type,omitempty" jsonschema_description:"MIME type for the uploaded bytes when using content_base64; if omitted, inferred from name or the file's metadata in Drive"`
+	MoveToFolder  string `json:"move_to_folder,omitempty" jsonschema_description:"Folder ID to move file to"`
 }
 
 func createUpdateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[UpdateFileInput, any] {
@@ -148,6 +153,20 @@ func createUpdateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[Updat
 		srv, err := factory.Drive(ctx, input.UserEmail)
 		if err != nil {
 			return nil, nil, middleware.HandleGoogleAPIError(err)
+		}
+
+		hasText := input.Content != ""
+		hasB64 := driveBase64PayloadNonEmpty(input.ContentBase64)
+		if hasText && hasB64 {
+			return nil, nil, fmt.Errorf("provide only one of content or content_base64, not both")
+		}
+
+		var decoded []byte
+		if hasB64 {
+			decoded, err = decodeDriveContentBase64(input.ContentBase64, office.MaxFileSize)
+			if err != nil {
+				return nil, nil, err
+			}
 		}
 
 		fileMetadata := &drive.File{}
@@ -160,7 +179,28 @@ func createUpdateFileHandler(factory *services.Factory) mcp.ToolHandlerFor[Updat
 			Fields("id, name, mimeType, webViewLink").
 			Context(ctx)
 
-		if input.Content != "" {
+		if hasB64 {
+			mimeType := strings.TrimSpace(input.MimeType)
+			mimeType = resolveDriveUploadMimeType(mimeType, input.Name)
+			if mimeType == "" {
+				existingMeta, gerr := srv.Files.Get(input.FileID).Fields("mimeType", "name").SupportsAllDrives(true).Context(ctx).Do()
+				if gerr != nil {
+					return nil, nil, middleware.HandleGoogleAPIError(gerr)
+				}
+				candidateName := input.Name
+				if candidateName == "" {
+					candidateName = existingMeta.Name
+				}
+				mimeType = resolveDriveUploadMimeType("", candidateName)
+				if mimeType == "" {
+					mimeType = existingMeta.MimeType
+				}
+			}
+			if mimeType == "" {
+				mimeType = "application/octet-stream"
+			}
+			call = call.Media(bytes.NewReader(decoded), googleapi.ContentType(mimeType))
+		} else if hasText {
 			call = call.Media(strings.NewReader(input.Content))
 		}
 

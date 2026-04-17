@@ -51,7 +51,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_drive_file",
 		Icons:       serviceIcons,
-		Description: "Create a new file in Google Drive with optional content. Supports text files and Google Workspace native types.",
+		Description: "Create a new file in Google Drive with optional content. Supports plain text (content), binary uploads via Base64 (content_base64) for PDF, Office, images, etc., empty placeholder files, and Google Workspace native MIME types.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:         "Create Drive File",
 			OpenWorldHint: ptr.Bool(true),
@@ -116,7 +116,7 @@ func Register(server *mcp.Server, factory *services.Factory) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "update_drive_file",
 		Icons:       serviceIcons,
-		Description: "Update a file's name, content, or location in Google Drive.",
+		Description: "Update a file's name, content, or location in Google Drive. Content may be plain text (content) or Base64-encoded bytes (content_base64) for binaries such as PDF or DOCX.",
 		Annotations: &mcp.ToolAnnotations{
 			Title:          "Update Drive File",
 			IdempotentHint: true,

@@ -16,6 +16,9 @@ type Config struct {
 		ClientID     string
 		ClientSecret string
 		RedirectURL  string
+		// PublicClient enables PKCE-based OAuth without a client secret.
+		// Set GOOGLE_OAUTH_PUBLIC_CLIENT=true to activate.
+		PublicClient bool
 	}
 	Server struct {
 		Transport string
@@ -41,6 +44,7 @@ func Load() (*Config, error) {
 	// Environment variables
 	cfg.OAuth.ClientID = os.Getenv("GOOGLE_OAUTH_CLIENT_ID")
 	cfg.OAuth.ClientSecret = os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+	cfg.OAuth.PublicClient = envBool("GOOGLE_OAUTH_PUBLIC_CLIENT")
 	cfg.CSEID = os.Getenv("GOOGLE_CSE_ID")
 
 	cfg.CredentialsDir = os.Getenv("WORKSPACE_MCP_CREDENTIALS_DIR")
@@ -92,6 +96,7 @@ func Load() (*Config, error) {
 	flag.StringVar(&cfg.ToolTier, "tool-tier", cfg.ToolTier, "Load tools by tier: core, extended, or complete")
 	flag.BoolVar(&cfg.ReadOnly, "read-only", cfg.ReadOnly, "Request only read-only scopes, disable write tools")
 	flag.BoolVar(&cfg.PersistentAuth, "persistent-auth", cfg.PersistentAuth, "Persist OAuth tokens to disk (survives restarts)")
+	flag.BoolVar(&cfg.OAuth.PublicClient, "public-client", cfg.OAuth.PublicClient, "Use public OAuth client with PKCE (no client secret required)")
 	flag.Parse()
 
 	// CLI --tools flag overrides (not appends to) the ENABLED_SERVICES env var.
@@ -114,8 +119,8 @@ func Load() (*Config, error) {
 	if cfg.OAuth.ClientID == "" {
 		return nil, fmt.Errorf("GOOGLE_OAUTH_CLIENT_ID environment variable is required")
 	}
-	if cfg.OAuth.ClientSecret == "" {
-		return nil, fmt.Errorf("GOOGLE_OAUTH_CLIENT_SECRET environment variable is required")
+	if err := validateOAuthMode(cfg); err != nil {
+		return nil, err
 	}
 
 	// Build OAuth redirect URL
@@ -140,4 +145,19 @@ func envOrDefault(key, def string) string {
 func envBool(key string) bool {
 	v := strings.ToLower(os.Getenv(key))
 	return v == "true" || v == "1" || v == "yes"
+}
+
+// validateOAuthMode checks that the OAuth credential configuration is internally consistent.
+// Confidential clients require a client secret; public clients (PKCE) do not.
+func validateOAuthMode(cfg *Config) error {
+	if cfg.OAuth.PublicClient {
+		return nil
+	}
+	if cfg.OAuth.ClientSecret == "" {
+		return fmt.Errorf(
+			"GOOGLE_OAUTH_CLIENT_SECRET is required for confidential client mode; " +
+				"set GOOGLE_OAUTH_PUBLIC_CLIENT=true to use a public (secretless) client with PKCE",
+		)
+	}
+	return nil
 }

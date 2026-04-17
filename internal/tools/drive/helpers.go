@@ -1,7 +1,9 @@
 package drive
 
 import (
+	"encoding/base64"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"google.golang.org/api/drive/v3"
@@ -142,4 +144,95 @@ func isGoogleNativeType(mimeType string) bool {
 // isOfficeType returns true if the MIME type is a Microsoft Office XML format.
 func isOfficeType(mimeType string) bool {
 	return office.IsOfficeType(mimeType)
+}
+
+// driveBase64PayloadNonEmpty reports whether content_base64 carries non-whitespace payload.
+func driveBase64PayloadNonEmpty(s string) bool {
+	return normalizeBase64Payload(s) != ""
+}
+
+func normalizeBase64Payload(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\r", "")
+	s = strings.ReplaceAll(s, " ", "")
+	s = strings.ReplaceAll(s, "\t", "")
+	return s
+}
+
+// decodeDriveContentBase64 decodes standard or URL-safe base64 (RFC 4648) after stripping
+// common whitespace from pasted payloads. Enforces maxDecodedBytes on the decoded length.
+func decodeDriveContentBase64(s string, maxDecodedBytes int) ([]byte, error) {
+	payload := normalizeBase64Payload(s)
+	if payload == "" {
+		return nil, fmt.Errorf("content_base64 is empty")
+	}
+	var (
+		dec []byte
+		err error
+	)
+	if dec, err = base64.StdEncoding.DecodeString(payload); err != nil {
+		if dec, err = base64.URLEncoding.DecodeString(payload); err != nil {
+			dec, err = base64.RawURLEncoding.DecodeString(payload)
+		}
+	}
+	if err != nil {
+		return nil, fmt.Errorf("content_base64: decode failed (use standard or URL-safe base64): %w", err)
+	}
+	if len(dec) > maxDecodedBytes {
+		return nil, fmt.Errorf("decoded file exceeds maximum size (%d bytes; max %d)", len(dec), maxDecodedBytes)
+	}
+	return dec, nil
+}
+
+// mimeTypeFromFileExtension returns a MIME type for well-known extensions, or "" if unknown.
+func mimeTypeFromFileExtension(name string) string {
+	switch strings.ToLower(filepath.Ext(name)) {
+	case ".pdf":
+		return "application/pdf"
+	case ".docx":
+		return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+	case ".doc":
+		return "application/msword"
+	case ".xlsx":
+		return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	case ".xls":
+		return "application/vnd.ms-excel"
+	case ".pptx":
+		return "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+	case ".ppt":
+		return "application/vnd.ms-powerpoint"
+	case ".zip":
+		return "application/zip"
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".gif":
+		return "image/gif"
+	case ".webp":
+		return "image/webp"
+	case ".txt":
+		return "text/plain"
+	case ".csv":
+		return "text/csv"
+	case ".json":
+		return "application/json"
+	case ".xml":
+		return "application/xml"
+	case ".mp4":
+		return "video/mp4"
+	case ".mp3":
+		return "audio/mpeg"
+	default:
+		return ""
+	}
+}
+
+// resolveDriveUploadMimeType returns explicit MIME when set, otherwise from the file name extension.
+func resolveDriveUploadMimeType(explicitMime, fileName string) string {
+	if strings.TrimSpace(explicitMime) != "" {
+		return strings.TrimSpace(explicitMime)
+	}
+	return mimeTypeFromFileExtension(fileName)
 }

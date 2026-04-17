@@ -292,7 +292,8 @@ Every tool declares MCP **annotations** so clients can reason about safety and r
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GOOGLE_OAUTH_CLIENT_ID` | **Yes** | — | OAuth 2.0 client ID |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | **Yes** | — | OAuth 2.0 client secret |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | **Cond.** | — | OAuth 2.0 client secret (required unless public client mode) |
+| `GOOGLE_OAUTH_PUBLIC_CLIENT` | No | `false` | PKCE public client — no secret needed ([details](docs/auth-and-scopes.md#confidential-vs-public-client-pkce)) |
 | `ENABLED_SERVICES` | No | all | Comma-separated service list (same names as `--services`) |
 | `MCP_TRANSPORT` | No | `stdio` * | Transport: `stdio` or `streamable-http` (*`Dockerfile` defaults to `streamable-http`*) |
 | `MCP_PORT` / `PORT` | No | `8000` | HTTP port |

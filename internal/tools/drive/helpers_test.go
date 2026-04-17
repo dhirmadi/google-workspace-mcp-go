@@ -1,6 +1,7 @@
 package drive
 
 import (
+	"encoding/base64"
 	"testing"
 
 	gdrive "google.golang.org/api/drive/v3"
@@ -113,5 +114,68 @@ func TestMimeTypeForExport(t *testing.T) {
 	got = mimeTypeForExport("text/plain")
 	if got != "" {
 		t.Errorf("got %q, want empty for non-google type", got)
+	}
+}
+
+func TestMimeTypeFromFileExtension(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"a.pdf", "application/pdf"},
+		{"b.DOCX", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+		{"noext", ""},
+	}
+	for _, tt := range tests {
+		if got := mimeTypeFromFileExtension(tt.name); got != tt.want {
+			t.Errorf("mimeTypeFromFileExtension(%q) = %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+func TestResolveDriveUploadMimeType(t *testing.T) {
+	if got := resolveDriveUploadMimeType("application/pdf", "x.bin"); got != "application/pdf" {
+		t.Errorf("explicit: got %q", got)
+	}
+	if got := resolveDriveUploadMimeType("", "x.pdf"); got != "application/pdf" {
+		t.Errorf("from name: got %q", got)
+	}
+}
+
+func TestDecodeDriveContentBase64(t *testing.T) {
+	raw := []byte{0, 1, 2, 255}
+	std := base64.StdEncoding.EncodeToString(raw)
+	got, err := decodeDriveContentBase64(std, 1024)
+	if err != nil || string(got) != string(raw) {
+		t.Fatalf("std: err=%v got=%v", err, got)
+	}
+	url := base64.RawURLEncoding.EncodeToString(raw)
+	got, err = decodeDriveContentBase64(url, 1024)
+	if err != nil || string(got) != string(raw) {
+		t.Fatalf("rawurl: err=%v got=%v", err, got)
+	}
+	withNL := "\n " + std + " \t"
+	got, err = decodeDriveContentBase64(withNL, 1024)
+	if err != nil || string(got) != string(raw) {
+		t.Fatalf("whitespace: err=%v got=%v", err, got)
+	}
+	if _, err := decodeDriveContentBase64("", 1024); err == nil {
+		t.Fatal("empty payload: want error")
+	}
+	if _, err := decodeDriveContentBase64("@@@", 1024); err == nil {
+		t.Fatal("invalid base64: want error")
+	}
+	largePayload := base64.StdEncoding.EncodeToString([]byte{1, 2, 3, 4, 5})
+	if _, err := decodeDriveContentBase64(largePayload, 4); err == nil {
+		t.Fatal("oversize decoded: want error")
+	}
+}
+
+func TestDriveBase64PayloadNonEmpty(t *testing.T) {
+	if !driveBase64PayloadNonEmpty(" YWJj ") { // "abc"
+		t.Fatal("expected non-empty")
+	}
+	if driveBase64PayloadNonEmpty("  \n\t  ") {
+		t.Fatal("expected empty")
 	}
 }

@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Claude Code project assets (May 2026)
+
+- **Slash commands** (`.claude/commands/`):
+  - **`/implement-roadmapitem`** — spec-first **TDD** for an active `docs/roadmap/XXX-NN-itemname.md` item (tests before production code; verify with `golangci-lint` + `go test -race`).
+  - **`/review-roadmapitem`** — **critical** review of the implementation for that item (security → quality → docs → performance); output Blocker / Should-fix / Nit with file:line and concrete follow-ups.
+  - **`/podman-mcp-local-verify`** — **Podman** only: `podman build` → run container on host port **18000** (override with `MCP_VERIFY_PORT`) → verify `http://127.0.0.1:$PORT/mcp` responds → **stop**, **rm**, **rmi** (see **`.claude/agents/podman-mcp-local-test.md`**).
+- **Agents** (`.claude/agents/`): **`podman-mcp-local-test`** — same lifecycle as `/podman-mcp-local-verify` (delegate with the Task tool when you want an isolated run).
+- **Skills** (`.claude/skills/*/SKILL.md`): auto-invoked when relevant — **`google-workspace-mcp-go`** (handler/registry/auth patterns), **`roadmap-spec-tdd`** (red–green–refactor against ACs), **`mcp-security-review`** (OAuth/tool safety checklist).
+- **Settings**: `.claude/settings.json` (team defaults); override locally with **`.claude/settings.local.json`** (gitignored).
+
+**Roadmap workflow**: Items live under `docs/roadmap/`; overview in `docs/roadmap/README.md`; archive closed work per `docs/roadmap/archive/README.md`. Harden specs with the Product Manager **`/harden`** flow (Cursor) or equivalent before large TDD drops.
+
 ## Project Overview
 
 MCP server in Go 1.24 exposing 136 tools across 12 Google Workspace services (Gmail, Drive, Calendar, Docs, Sheets, Chat, Forms, Slides, Tasks, Contacts, Custom Search, Apps Script). Uses the official MCP Go SDK (`github.com/modelcontextprotocol/go-sdk v1.2.0`, spec 2025-11-25).
