@@ -29,7 +29,7 @@ func (b *Builder) Header(format string, args ...any) *Builder {
 
 // KeyValue writes a key-value pair.
 func (b *Builder) KeyValue(key string, value any) *Builder {
-	b.sb.WriteString(fmt.Sprintf("• %s: %v\n", key, value))
+	fmt.Fprintf(&b.sb, "• %s: %v\n", key, value)
 	return b
 }
 
@@ -44,7 +44,7 @@ func (b *Builder) Item(format string, args ...any) *Builder {
 
 // Line writes a plain line with optional formatting arguments.
 func (b *Builder) Line(format string, args ...any) *Builder {
-	b.sb.WriteString(fmt.Sprintf(format, args...))
+	fmt.Fprintf(&b.sb, format, args...)
 	b.sb.WriteByte('\n')
 	return b
 }

@@ -235,20 +235,20 @@ func formatSubjectHeader(subject string) string {
 func buildRawMessage(to, subject, body, cc, bcc, threadID, inReplyTo, references string) string {
 	var msg strings.Builder
 
-	msg.WriteString(fmt.Sprintf("To: %s\r\n", sanitizeOneLineHeaderValue(to)))
+	fmt.Fprintf(&msg, "To: %s\r\n", sanitizeOneLineHeaderValue(to))
 	if cc != "" {
-		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", sanitizeOneLineHeaderValue(cc)))
+		fmt.Fprintf(&msg, "Cc: %s\r\n", sanitizeOneLineHeaderValue(cc))
 	}
 	if bcc != "" {
-		msg.WriteString(fmt.Sprintf("Bcc: %s\r\n", sanitizeOneLineHeaderValue(bcc)))
+		fmt.Fprintf(&msg, "Bcc: %s\r\n", sanitizeOneLineHeaderValue(bcc))
 	}
-	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", formatSubjectHeader(subject)))
+	fmt.Fprintf(&msg, "Subject: %s\r\n", formatSubjectHeader(subject))
 
 	if inReplyTo != "" {
-		msg.WriteString(fmt.Sprintf("In-Reply-To: %s\r\n", sanitizeOneLineHeaderValue(inReplyTo)))
+		fmt.Fprintf(&msg, "In-Reply-To: %s\r\n", sanitizeOneLineHeaderValue(inReplyTo))
 	}
 	if references != "" {
-		msg.WriteString(fmt.Sprintf("References: %s\r\n", sanitizeOneLineHeaderValue(references)))
+		fmt.Fprintf(&msg, "References: %s\r\n", sanitizeOneLineHeaderValue(references))
 	}
 
 	msg.WriteString("MIME-Version: 1.0\r\n")

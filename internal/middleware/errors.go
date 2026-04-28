@@ -65,10 +65,10 @@ func HandleGoogleAPIError(err error) error {
 				"rate limit exceeded for this Google API — wait 30-60 seconds before retrying this tool call")
 		case 500, 502, 503:
 			return fmt.Errorf(
-				"Google API server error (%d) — this is a transient issue, retry after a few seconds. Detail: %s",
+				"google API server error (%d) — this is a transient issue, retry after a few seconds. Detail: %s",
 				googleErr.Code, googleErr.Message)
 		default:
-			return fmt.Errorf("Google API error (%d): %s", googleErr.Code, googleErr.Message)
+			return fmt.Errorf("google API error (%d): %s", googleErr.Code, googleErr.Message)
 		}
 	}
 

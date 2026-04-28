@@ -53,70 +53,70 @@ func generateTriggerCode(triggerType, functionName, interval string) (string, er
 		if interval == "" {
 			interval = "hourly"
 		}
-		sb.WriteString(fmt.Sprintf(`/**
+		fmt.Fprintf(&sb, `/**
  * Creates a time-based trigger for %s.
  * Run this function once to install the trigger.
  */
 function createTrigger() {
-`, functionName))
+`, functionName)
 		switch interval {
 		case "every_minute":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyMinutes(1)
     .create();
-`, functionName))
+`, functionName)
 		case "every_5_minutes":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyMinutes(5)
     .create();
-`, functionName))
+`, functionName)
 		case "every_10_minutes":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyMinutes(10)
     .create();
-`, functionName))
+`, functionName)
 		case "every_15_minutes":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyMinutes(15)
     .create();
-`, functionName))
+`, functionName)
 		case "every_30_minutes":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyMinutes(30)
     .create();
-`, functionName))
+`, functionName)
 		case "hourly":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyHours(1)
     .create();
-`, functionName))
+`, functionName)
 		case "daily":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .everyDays(1)
     .atHour(9)
     .create();
-`, functionName))
+`, functionName)
 		case "weekly":
-			sb.WriteString(fmt.Sprintf(`  ScriptApp.newTrigger('%s')
+			fmt.Fprintf(&sb, `  ScriptApp.newTrigger('%s')
     .timeBased()
     .onWeekDay(ScriptApp.WeekDay.MONDAY)
     .atHour(9)
     .create();
-`, functionName))
+`, functionName)
 		default:
 			return "", fmt.Errorf("unknown interval %q - use: every_minute, every_5_minutes, every_10_minutes, every_15_minutes, every_30_minutes, hourly, daily, weekly", interval)
 		}
 		sb.WriteString("}\n")
 
 	case "spreadsheet_open":
-		sb.WriteString(fmt.Sprintf(`/**
+		fmt.Fprintf(&sb, `/**
  * Creates an onOpen trigger for %s.
  * Run this function once to install the trigger.
  */
@@ -127,10 +127,10 @@ function createTrigger() {
     .onOpen()
     .create();
 }
-`, functionName, functionName))
+`, functionName, functionName)
 
 	case "spreadsheet_edit":
-		sb.WriteString(fmt.Sprintf(`/**
+		fmt.Fprintf(&sb, `/**
  * Creates an onEdit trigger for %s.
  * Run this function once to install the trigger.
  */
@@ -141,10 +141,10 @@ function createTrigger() {
     .onEdit()
     .create();
 }
-`, functionName, functionName))
+`, functionName, functionName)
 
 	case "form_submit":
-		sb.WriteString(fmt.Sprintf(`/**
+		fmt.Fprintf(&sb, `/**
  * Creates a form submit trigger for %s.
  * Run this function once to install the trigger.
  */
@@ -155,10 +155,10 @@ function createTrigger() {
     .onFormSubmit()
     .create();
 }
-`, functionName, functionName))
+`, functionName, functionName)
 
 	case "document_open":
-		sb.WriteString(fmt.Sprintf(`/**
+		fmt.Fprintf(&sb, `/**
  * Creates an onOpen trigger for %s.
  * Run this function once to install the trigger.
  */
@@ -169,7 +169,7 @@ function createTrigger() {
     .onOpen()
     .create();
 }
-`, functionName, functionName))
+`, functionName, functionName)
 
 	default:
 		return "", fmt.Errorf("unknown trigger type %q - use: time_based, spreadsheet_open, spreadsheet_edit, form_submit, document_open", triggerType)

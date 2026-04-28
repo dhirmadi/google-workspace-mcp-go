@@ -78,7 +78,7 @@ func TestHandleGoogleAPIError(t *testing.T) {
 		{
 			name:        "unknown google error code",
 			err:         &googleapi.Error{Code: 418, Message: "teapot"},
-			wantContain: "Google API error (418)",
+			wantContain: "google API error (418)",
 		},
 		{
 			name:        "non-google error passed through",
