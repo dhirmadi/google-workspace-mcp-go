@@ -98,6 +98,6 @@ type Config struct {
     LogLevel        string
     CredentialsDir  string
     CSEID           string // GOOGLE_CSE_ID
-    GoVersion       string // Build-time: Go 1.24
+    GoVersion       string // Build-time: Go 1.26.2
 }
 ```

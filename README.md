@@ -4,7 +4,7 @@
 [![Go](https://img.shields.io/github/go-mod/go-version/evert/google-workspace-mcp-go?label=Go)](go.mod)
 [![Release](https://img.shields.io/github/v/release/evert/google-workspace-mcp-go?label=release)](https://github.com/evert/google-workspace-mcp-go/releases)
 
-A **[Model Context Protocol](https://modelcontextprotocol.io/)** server in **Go 1.24** that exposes **Google Workspace** to AI agents: Gmail, Drive, Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Contacts, Programmable Search, and Apps Script. Implements **tools** targeting MCP spec **2025-11-25** (via [`github.com/modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk)).
+A **[Model Context Protocol](https://modelcontextprotocol.io/)** server in **Go 1.26.2** that exposes **Google Workspace** to AI agents: Gmail, Drive, Calendar, Docs, Sheets, Slides, Chat, Forms, Tasks, Contacts, Programmable Search, and Apps Script. Implements **tools** targeting MCP spec **2025-11-25** (via [`github.com/modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk)).
 
 | | |
 | :--- | :--- |
@@ -36,7 +36,7 @@ A **[Model Context Protocol](https://modelcontextprotocol.io/)** server in **Go 
 
 ## Prerequisites
 
-- **Docker** (recommended) *or* **Go 1.24+** to build from source
+- **Docker** (recommended) *or* **Go 1.26.2+** to build from source
 - A **Google Cloud** project with **OAuth 2.0 Client ID** (type: **Web application**) and **Authorized redirect URIs** matching your server port (default `http://localhost:8000/oauth/callback`)
 - **APIs enabled** in Google Cloud for the products you use (Gmail, Drive, Calendar, and so on)
 

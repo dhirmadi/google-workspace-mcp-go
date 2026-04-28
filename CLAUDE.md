@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-MCP server in Go 1.24 exposing 136 tools across 12 Google Workspace services (Gmail, Drive, Calendar, Docs, Sheets, Chat, Forms, Slides, Tasks, Contacts, Custom Search, Apps Script). Uses the official MCP Go SDK (`github.com/modelcontextprotocol/go-sdk v1.2.0`, spec 2025-11-25).
+MCP server in Go 1.26.2 exposing 136 tools across 12 Google Workspace services (Gmail, Drive, Calendar, Docs, Sheets, Chat, Forms, Slides, Tasks, Contacts, Custom Search, Apps Script). Uses the official MCP Go SDK (`github.com/modelcontextprotocol/go-sdk v1.2.0`, spec 2025-11-25).
 
 Module path: `github.com/evert/google-workspace-mcp-go`
 

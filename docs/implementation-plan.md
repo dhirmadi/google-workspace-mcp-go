@@ -19,7 +19,7 @@ The phase checklist below is the **original bootstrap sequence** for this reposi
 
 Core infrastructure that everything else depends on.
 
-- [ ] Initialize Go module (`go.mod`) — Go 1.24, pin `go-sdk` v1.2.0, `google.golang.org/api` v0.262.0, `oauth2` v0.34.0, `yaml.v3` v3.0.1
+- [ ] Initialize Go module (`go.mod`) — Go 1.26.2, pin `go-sdk` v1.2.0, `google.golang.org/api` v0.262.0, `oauth2` v0.34.0, `yaml.v3` v3.0.1
 - [ ] `.golangci.yml` — linter configuration (set up early, not Phase 5)
 - [ ] `internal/config/config.go` — env var loading, CLI flag parsing, `GOOGLE_OAUTH_CLIENT_ID` naming
 - [ ] `internal/config/tiers.go` — YAML tier config loading
@@ -35,7 +35,7 @@ Core infrastructure that everything else depends on.
 - [ ] `internal/registry/registry.go` — tool registry with tier/annotations/service filtering, SEP-986 name validation
 - [ ] `cmd/server/main.go` — signal handling, stdio + streamable-http transport, SDK middleware wiring
 - [ ] `configs/tool_tiers.yaml` — tier config (updated with tier promotions)
-- [ ] `Dockerfile` — Go 1.24, multi-stage build, BuildKit cache mounts, distroless runtime
+- [ ] `Dockerfile` — Go 1.26.2, multi-stage build, BuildKit cache mounts, distroless runtime
 - [ ] `.dockerignore`
 
 **Exit criteria**: Server starts, loads config, initializes factory, runs over both stdio and HTTP with zero tools registered. Graceful shutdown works. Linter passes.

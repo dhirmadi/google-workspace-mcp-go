@@ -2,13 +2,13 @@
 
 ## Overview
 
-The Google Workspace MCP server is a Go 1.24 application that exposes 136 tools across 12 Google Workspace services via the Model Context Protocol (targeting spec **2025-11-25**). It runs as a container and communicates over stdio (default) or streamable HTTP.
+The Google Workspace MCP server is a Go 1.26.2 application that exposes 136 tools across 12 Google Workspace services via the Model Context Protocol (targeting spec **2025-11-25**). It runs as a container and communicates over stdio (default) or streamable HTTP.
 
 ```
 ┌─────────────────────────────────────────────────────┐
 │                   Tech Stack                         │
 ├─────────────────────────────────────────────────────┤
-│  Go:        1.24 (stable, Feb 2025)                 │
+│  Go:        1.26.2                                   │
 │  MCP Spec:  2025-11-25                              │
 │  Framework: github.com/modelcontextprotocol/go-sdk  │
 │  OAuth:     go-sdk/auth + golang.org/x/oauth2       │
@@ -159,7 +159,7 @@ These are deferred because the tool surface alone (136 tools) provides full Goog
 ## Dependencies
 
 ```
-Go                                      1.24
+Go                                      1.26.2
 github.com/modelcontextprotocol/go-sdk  v1.2.0
 golang.org/x/oauth2                     v0.34.0
 google.golang.org/api                   v0.262.0
